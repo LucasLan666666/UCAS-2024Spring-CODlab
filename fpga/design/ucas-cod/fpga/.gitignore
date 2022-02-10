@@ -1,0 +1,8 @@
+#
+# Auto-generated files
+#
+
+vivado_out/
+vivado_prj/
+sources/intermediate/
+sources/ip_catalog/firesim_top/

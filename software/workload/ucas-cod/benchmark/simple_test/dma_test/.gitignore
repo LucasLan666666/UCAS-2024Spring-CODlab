@@ -1,0 +1,10 @@
+#
+# Generated temporary files
+#
+
+*.o
+*/bin/
+*/disassembly/
+*/obj/
+*/elf/
+*/sim/
