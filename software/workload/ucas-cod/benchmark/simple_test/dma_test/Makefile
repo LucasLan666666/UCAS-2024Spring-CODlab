@@ -45,7 +45,7 @@ $(ARCH)/elf/%: $(OBJS) $(ARCH)/obj/%/data_mover.o
 		$(OBJDUMP) -DS ../$@ > disassembly/$(patsubst $(ARCH)/elf/%,%,$@).S && \
 		$(OBJCOPY) -S -O binary \
 		    -j .text -j .text.startup -j .MIPS.abiflags \
-		    -j .data -j .rodata -j .rodata.str1.4 \
+		    -j .data -j .rodata -j .sdata -j .rodata.str1.4 \
 		    -j .bss --set-section-flags .bss=alloc,contents \
 		    -j .sbss --set-section-flags .sbss=alloc,contents \
 		    -j .scommon --set-section-flags .scommon=alloc,contents \
