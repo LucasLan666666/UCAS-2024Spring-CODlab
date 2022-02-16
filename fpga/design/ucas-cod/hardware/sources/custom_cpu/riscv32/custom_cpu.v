@@ -27,6 +27,10 @@ module custom_cpu(
 	input         Read_data_Valid,
 	output        Read_data_Ready,
 
+`ifdef SIM_RETIRED_FIFO
+	input         inst_retired_fifo_full,
+`endif
+
 	input         intr,
 
 	output [31:0] cpu_perf_cnt_0,
@@ -67,12 +71,11 @@ module custom_cpu(
 * }
 *
 */
-`ifdef BHV_SIM
+`ifdef SIM_RETIRED_FIFO
 	wire        inst_retire_valid;
 	wire [69:0] inst_retired;
 `endif
 
-  //TODO: Please add your Turbo CPU code here
+// TODO: Please add your custom CPU code here
 
 endmodule
-
