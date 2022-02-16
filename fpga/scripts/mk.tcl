@@ -61,7 +61,6 @@ if {$act == "prj_gen"} {
 	close_project
 
 } elseif {$act == "bit_gen"} {
-	open_project ${prj_file}
 	# Design optimization
 	source [file join $flow_dir "opt.tcl"]
 	# Placement
