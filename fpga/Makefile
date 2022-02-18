@@ -9,7 +9,7 @@ BIT_INSTALL := $(O)/system.bit
 VIVADO_PRJ_TCL := $(FPGA_ROOT)/scripts/mk.tcl
 VIVADO_FILE_TCL := $(FPGA_ROOT)/scripts/file_cp.tcl
 
-ifneq ($(findstring $(FPGA_ACT), "dcp_chk"),)
+ifneq ($(findstring $(FPGA_ACT), "dcp_chk sch_gen"),)
 VIVADO_MODE := gui
 else
 VIVADO_MODE := batch

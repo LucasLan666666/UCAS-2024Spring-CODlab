@@ -88,6 +88,5 @@ if {$act == "prj_gen"} {
 	# Launch tcl script whose name is specified by $target
 	source [file join $design_dir "dcp_gen.tcl"]
 } else {
-	puts "No specified action command for Vivado project"
-	exit
+	source [file join $design_dir "$act.tcl"]
 }
