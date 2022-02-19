@@ -1,0 +1,3 @@
+include:
+  - local: 'lab_env.yml'
+  - remote: 'https://gitlab.com/zhaoran90/ucas-cod-yml/-/raw/main/ucas-cod-ci.yml'

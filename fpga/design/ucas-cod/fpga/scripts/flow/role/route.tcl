@@ -15,5 +15,5 @@ write_bitstream -cell [get_cells mpsoc_i/accel_role_${region}/inst] \
     -force ${out_dir}/${target_path}/role_${region}.bit
 write_cfgmem -format BIN -interface SMAPx32 \
     -disablebitswap -loadbit "up 0x0 ${out_dir}/${target_path}/role_${region}.bit" \
-    -force ${out_dir}/${target_path}/role_${region}.bit.bin
+    -force ${out_dir}/role_${region}.bit.bin
 

@@ -37,7 +37,7 @@ else
 vivado_prj: FORCE
 	@mkdir -p $(DIR_GEN_OBJ)
 ifeq ($(VIVADO_MODE),batch)
-	@cd $(VIVADO_PRJ_LOC) && $(VIVADO) $(VIVADO_PRJ_FLAGS) 2>&1 | tee $(VIVADO_LOG_LOC)/$(FPGA_ACT).log
+	@cd $(VIVADO_PRJ_LOC) && $(VIVADO) $(VIVADO_PRJ_FLAGS) 2>&1 | tee $(VIVADO_LOG_LOC)/$(FPGA_ACT).log && bash $(FPGA_ROOT)/err_det.sh $(VIVADO_LOG_LOC)/$(FPGA_ACT).log
 else
 	@cd $(VIVADO_PRJ_LOC) && $(VIVADO) $(VIVADO_PRJ_FLAGS)
 endif

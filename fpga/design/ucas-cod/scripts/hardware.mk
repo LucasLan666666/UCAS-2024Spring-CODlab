@@ -32,5 +32,5 @@ endif
 bhv_sim:
 	@mkdir -p $(SIM_OBJ_LOC)
 	iverilog -o $(SIM_BIN) -s $(SIM_TOP) $(IV_FLAGS) $(SIM_SRCS)
-	$(SIM_BIN) +DUMP="$(SIM_DUMP)" $(PLUSARGS)
+	$(SIM_BIN) +DUMP="$(SIM_DUMP)" $(PLUSARGS) | tee bhv_sim.log && bash fpga/err_det.sh bhv_sim.log
 
