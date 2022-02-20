@@ -1,5 +1,5 @@
 
-.PHONY: bhv_sim
+.PHONY: bhv_sim wav_chk
 
 SIM_SRC_LOC := fpga/design/ucas-cod/hardware/sim
 RTL_SRC_LOC := $(SIM_SRC_LOC)/../sources/
@@ -34,3 +34,5 @@ bhv_sim:
 	iverilog -o $(SIM_BIN) -s $(SIM_TOP) $(IV_FLAGS) $(SIM_SRCS)
 	$(SIM_BIN) +DUMP="$(SIM_DUMP)" $(PLUSARGS) | tee bhv_sim.log && bash fpga/err_det.sh bhv_sim.log
 
+wav_chk:
+	@cd fpga/design/ucas-cod/run/ && bash get_wav.sh $(SIM_TARGET) $(LIKELY_BENCH) $(SIM_DUMP)
