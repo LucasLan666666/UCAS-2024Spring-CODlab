@@ -106,7 +106,7 @@ module simple_cpu_test
 		    else if (`MEM_READ_GOLDEN !== `MEM_READ)
 		    begin
 			    $display("=================================================");
-			    $display("ERROR: at %dns, PC = 0x%h.", $time, `PC_GOLDEN);
+			    $display("ERROR: at %dns, PC = 0x%h.", $time, `PC);
 			    $display("Yours:     MemRead = 0x%h", `MEM_READ);
 			    $display("Reference: MemRead = 0x%h", `MEM_READ_GOLDEN);
 			    $display("=================================================");
@@ -116,7 +116,7 @@ module simple_cpu_test
 		    else if (`MEM_WEN_GOLDEN !== `MEM_WEN)
 		    begin
 			    $display("=================================================");
-			    $display("ERROR: at %dns, PC = 0x%h.", $time, `PC_GOLDEN);
+			    $display("ERROR: at %dns, PC = 0x%h.", $time, `PC);
 			    $display("Yours:     MemWrite = 0x%h", `MEM_WEN);
 			    $display("Reference: MemWrite = 0x%h", `MEM_WEN_GOLDEN);
 			    $display("=================================================");
@@ -126,7 +126,7 @@ module simple_cpu_test
 		    else if ((`MEM_READ == 1'b1) & (`MEM_ADDR_GOLDEN !== `MEM_ADDR))
 		    begin
 			    $display("=================================================");
-			    $display("ERROR: at %dns, PC = 0x%h.", $time, `PC_GOLDEN);
+			    $display("ERROR: at %dns, PC = 0x%h.", $time, `PC);
 			    $display("Yours:     MemRead Address = 0x%h", `MEM_ADDR);
 			    $display("Reference: MemRead Address = 0x%h", `MEM_ADDR_GOLDEN);
 			    $display("=================================================");
@@ -136,7 +136,7 @@ module simple_cpu_test
 		    else if ((`MEM_WEN == 1'b1) & (`MEM_ADDR_GOLDEN !== `MEM_ADDR))
 		    begin
 				$display("=================================================");
-				$display("ERROR: at %dns, PC = 0x%h.", $time, `PC_GOLDEN);
+				$display("ERROR: at %dns, PC = 0x%h.", $time, `PC);
 				$display("Yours:     MemWrite Address = 0x%h", `MEM_ADDR);
 				$display("Reference: MemWrite Address = 0x%h", `MEM_ADDR_GOLDEN);
 				$display("=================================================");
@@ -148,7 +148,7 @@ module simple_cpu_test
 			    if ((`MEM_WDATA_GOLDEN != 32'd0) | (`MEM_WDATA !== 32'hxxxxxxxx))
 			    begin
 				    $display("=================================================");
-				    $display("ERROR: at %dns, PC = 0x%h.", $time, `PC_GOLDEN);
+				    $display("ERROR: at %dns, PC = 0x%h.", $time, `PC);
 				    $display("Yours:     Write_data = 0x%h", `MEM_WDATA);
 				    $display("Reference: Write_data = 0x%h", `MEM_WDATA_GOLDEN);
 				    $display("=================================================");
@@ -159,7 +159,7 @@ module simple_cpu_test
 		    else if ((`MEM_WEN == 1'b1) & (`MEM_WSTRB_GOLDEN !== `MEM_WSTRB))
 		    begin
 			    $display("=================================================");
-			    $display("ERROR: at %dns, PC = 0x%h.", $time, `PC_GOLDEN);
+			    $display("ERROR: at %dns, PC = 0x%h.", $time, `PC);
 			    $display("Yours:     Write_strb = 0x%h", `MEM_WSTRB);
 			    $display("Reference: Write_strb = 0x%h", `MEM_WSTRB_GOLDEN);
 			    $display("=================================================");
@@ -186,4 +186,5 @@ module simple_cpu_test
     end
 
 endmodule
+
 
