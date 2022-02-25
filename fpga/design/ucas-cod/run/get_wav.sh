@@ -1,8 +1,8 @@
 #!/bin/bash
 
 SIM_TARGET=$1
-BENCH=$2
-SIM_DUMP=$3
+BENCH=$3
+SIM_DUMP=$2
 
 TOKEN_FILE=~/.gitlab.token
 ARTI_FILE=artifacts.zip
