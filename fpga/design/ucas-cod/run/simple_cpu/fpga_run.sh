@@ -76,3 +76,7 @@ then
         exit -1
 fi
 
+if [ $N_PASSED -eq 0 ]
+then
+        exit -1
+fi
