@@ -85,23 +85,31 @@ module simple_cpu_test
     `define PC_GOLDEN u_simple_cpu_golden.u_simple_cpu.PC
     
     `define PC_VALID  u_simple_cpu_golden.u_simple_cpu.current_state 
-    
+
+	wire [31:0] wbit_mask = {{8{`MEM_WSTRB_GOLDEN[3]}}, {8{`MEM_WSTRB_GOLDEN[2]}}, {8{`MEM_WSTRB_GOLDEN[1]}}, {8{`MEM_WSTRB_GOLDEN[0]}}};
+	reg compare_pc;
+	always @(posedge cpu_clk) begin
+		if (`RST)
+			compare_pc <= 1'b0;
+		else if (`PC_VALID == 5'b00100)
+			compare_pc <= 1'b1;
+		else if (compare_pc)
+			compare_pc <= 1'b0;
+	end
+
     always @(posedge cpu_clk)
     begin
 	    if(!`RST)
 	    begin
-		    if (`PC_VALID == 5'b00001)
-		    begin
-			    if (`PC !== `PC_GOLDEN)
-			    begin
-				    $display("=================================================");
-				    $display("ERROR: at %dns.", $time);
-				    $display("Yours:     PC = 0x%h", `PC);
-				    $display("Reference: PC = 0x%h", `PC_GOLDEN);
-				    $display("=================================================");
-				    $finish;
-			    end
-		    end
+			if (compare_pc & `PC !== `PC_GOLDEN)
+			begin
+				$display("=================================================");
+				$display("ERROR: at %dns.", $time);
+				$display("Yours:     PC = 0x%h", `PC);
+				$display("Reference: PC = 0x%h", `PC_GOLDEN);
+				$display("=================================================");
+				$finish;
+			end
 		    
 		    else if (`MEM_READ_GOLDEN !== `MEM_READ)
 		    begin
@@ -143,7 +151,7 @@ module simple_cpu_test
 				$finish;
 		    end
 		    
-		    else if ((`MEM_WEN == 1'b1) & (`MEM_WDATA_GOLDEN !== `MEM_WDATA))
+		    else if ((`MEM_WEN == 1'b1) & ((`MEM_WDATA_GOLDEN & wbit_mask) !== (`MEM_WDATA & wbit_mask)))
 		    begin
 			    if ((`MEM_WDATA_GOLDEN != 32'd0) | (`MEM_WDATA !== 32'hxxxxxxxx))
 			    begin
