@@ -19,7 +19,7 @@ add_files -norecurse -fileset sources_1 ${script_dir}/../design/${prj}/hardware/
 add_files -norecurse -fileset sources_1 ${script_dir}/../design/${prj}/fpga/sources/hdl/custom_role.v
 
 # User-specified architecture options of custom CPU
-source [file join $design_dir "../fpga/wrapper/custom_cpu/arch_options.tcl"]
+source [file join $design_dir "../hardware/sources/custom_cpu/arch_options.tcl"]
 
 # setup block design
 set bd_design role
