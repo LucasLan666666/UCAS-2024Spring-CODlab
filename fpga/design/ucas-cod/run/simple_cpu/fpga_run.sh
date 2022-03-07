@@ -9,11 +9,11 @@ MANAGER_PATH=/sys/class/fpga_manager/fpga0
 
 CONFIGFS_PATH=/sys/kernel/config/device-tree/overlays/role_$1
 
-SW_ELF_BIN=./software/workload/ucas-cod/host/simple_cpu/elf/loader_$1
+SW_ELF_BIN=./software/workload/ucas-cod/host/$3/elf/loader_$1
 
 BENCH_PATH=./software/workload/ucas-cod/benchmark/simple_test
 BENCH_SUITE=$2
-ARCH=mips
+ARCH=$4
 
 #============================#
 # Step 1: FPGA configuration #
