@@ -1,4 +1,3 @@
-
 .PHONY: bhv_sim wav_chk
 
 SIM_SRC_LOC := fpga/design/ucas-cod/hardware/sim
@@ -35,4 +34,4 @@ bhv_sim:
 	$(SIM_BIN) +DUMP="$(SIM_DUMP)" $(PLUSARGS) | tee bhv_sim.log && bash fpga/err_det.sh bhv_sim.log
 
 wav_chk:
-	@cd fpga/design/ucas-cod/run/ && bash get_wav.sh $(SIM_TARGET) $(SIM_DUMP) $(LIKELY_DUMP)
+	@cd fpga/design/ucas-cod/run/ && bash get_wav.sh $(SIM_TARGET) $(SIM_DUMP) $(LIKELY_BENCH)
