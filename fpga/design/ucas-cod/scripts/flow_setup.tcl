@@ -1,8 +1,6 @@
 set flow_dir ${design_dir}/../fpga/scripts/flow/${target}
 
-# variable freq (used in prj_gen):  specify target frequency of one design in a ROLE
 # variable region (used in bit_gen):  specify the required role number
-set cpu_freq [lindex $val 2]
 set region [lindex $val 2]
 
 # set the number of partial reconfiguration regions
