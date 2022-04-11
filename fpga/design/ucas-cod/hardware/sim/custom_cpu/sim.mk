@@ -15,8 +15,8 @@ SIM_SRCS += $(wildcard $(SIM_SRC_LOC)/$(SIM_TARGET)/$(DUT_ARCH)/golden/$(DUT_ISA
 SIM_SRCS += $(wildcard $(SIM_SRC_LOC)/$(SIM_TARGET)/common/*.v)
 
 IV_FLAGS := -I ../
-IV_FLAGS += -I $(RTL_SRC_LOC)/$(SIM_TARGET)/$(DUT_ISA)
 IV_FLAGS += -I $(SIM_SRC_LOC)/$(SIM_TARGET)
+IV_FLAGS += -I $(RTL_SRC_LOC)/$(SIM_TARGET)/$(DUT_ISA)/include
 IV_FLAGS += -DTRACE_FILE=\"$(TRACE_FILE)\"
 
 # Parsing user-defined architectural options
@@ -31,10 +31,6 @@ endif
 
 ifeq ($(USE_DCACHE),1)
 IV_FLAGS += -DUSE_DCACHE
-endif
-
-ifeq ($(DUT_ARCH),turbo)
-IV_FLAGS += -DSIM_RETIRED_FIFO
 endif
 
 # Use FST format for waveform to provide better compression ratio

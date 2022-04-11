@@ -27,10 +27,6 @@ module custom_cpu(
 	input         Read_data_Valid,
 	output        Read_data_Ready,
 
-`ifdef SIM_RETIRED_FIFO
-	input         inst_retired_fifo_full,
-`endif
-
 	input         intr,
 
 	output [31:0] cpu_perf_cnt_0,
@@ -51,30 +47,22 @@ module custom_cpu(
 	output [31:0] cpu_perf_cnt_15
 );
 
-/* The following two signals are leveraged for behavioral simulation, 
-* both of which are delivered to testbench.
+/* The following signal is leveraged for behavioral simulation, 
+* which is delivered to testbench.
 *
-* STUDENTS MUST CONTROL LOGICAL BEHAVIORS of BOTH SIGNALS.
-*
-* inst_retire_valid (1-bit): setting to 1 for one-cycle 
-* when inst_retired_fifo_full from testbench is low,  
-* indicating that one instruction is being retired from
-* the WB stage. 
+* STUDENTS MUST CONTROL LOGICAL BEHAVIORS of THIS SIGNAL.
 *
 * inst_retired (70-bit): detailed information of the retired instruction,
 * mainly including (in order) 
 * { 
-*   retired PC (32-bit), 
-*   reg_file write-back enable (1-bit), 
-*   reg_file write-back address (5-bit), 
-*   reg_file write-back data (32-bit) 
+*   reg_file write-back enable  (69:69,  1-bit),
+*   reg_file write-back address (68:64,  5-bit), 
+*   reg_file write-back data    (63:32, 32-bit),  
+*   retired PC                  (31: 0, 32-bit)
 * }
 *
 */
-`ifdef SIM_RETIRED_FIFO
-	wire        inst_retire_valid;
-	wire [69:0] inst_retired;
-`endif
+  wire [69:0] inst_retire;
 
 // TODO: Please add your custom CPU code here
 
