@@ -122,7 +122,7 @@ proc create_root_design { parentCell } {
   if {${::simple_dma} == "1"} {
 	  # Create instance: MMIO AXI IC to custom CPU
 	  set custom_cpu_mmio_ic [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_interconnect:2.1 custom_cpu_mmio_ic ]
-	  set_property -dict [list CONFIG.NUM_MI {3} CONFIG.NUM_SI {1}] $custom_cpu_mmio_ic
+	  set_property -dict [list CONFIG.NUM_MI {4} CONFIG.NUM_SI {1}] $custom_cpu_mmio_ic
 
           # Create instance: MEMORY AXI IC to custom CPU
           set custom_cpu_mem_ic [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_interconnect:2.1 custom_cpu_mem_ic ]
@@ -135,7 +135,7 @@ proc create_root_design { parentCell } {
   } else {
 	  # Create instance: MMIO AXI IC to custom CPU
 	  set custom_cpu_mmio_ic [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_interconnect:2.1 custom_cpu_mmio_ic ]
-	  set_property -dict [list CONFIG.NUM_MI {2} CONFIG.NUM_SI {1}] $custom_cpu_mmio_ic
+	  set_property -dict [list CONFIG.NUM_MI {3} CONFIG.NUM_SI {1}] $custom_cpu_mmio_ic
 
           # Create instance: MEMORY AXI IC to custom CPU
           set custom_cpu_mem_ic [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_interconnect:2.1 custom_cpu_mem_ic ]
@@ -193,6 +193,24 @@ proc create_root_design { parentCell } {
 
 	  incr i 1
   }
+
+  # Create instance: AXI GPIO controller as AXI wrapper of wall clock counter
+  set wall_clk_counter_wrapper [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_gpio:2.0 wall_clk_counter_wrapper ]
+  set_property -dict [ list CONFIG.C_ALL_INPUTS {1} \
+			CONFIG.C_ALL_OUTPUTS {0} \
+			CONFIG.C_GPIO_WIDTH {32} \
+			CONFIG.C_IS_DUAL {0} ] $wall_clk_counter_wrapper
+
+  # Create RTL block: wall_clk_counter
+  set block_name wall_clk_counter
+  set block_cell_name u_wall_clk_counter
+  if { [catch {set u_wall_clk_counter [create_bd_cell -type module -reference $block_name $block_cell_name] } errmsg] } {
+     catch {common::send_msg_id "BD_TCL-105" "ERROR" "Unable to add referenced block <$block_name>. Please add the files for ${block_name}'s definition into the project."}
+     return 1
+   } elseif { $u_wall_clk_counter eq "" } {
+     catch {common::send_msg_id "BD_TCL-106" "ERROR" "Unable to referenced block <$block_name>. Please add the files for ${block_name}'s definition into the project."}
+     return 1
+   }
 
   # Create instance: 8 x 1 crossbar for AXI GPIO controllers
   set gpio_ic [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_interconnect:2.1 gpio_ic ]
@@ -327,7 +345,10 @@ proc create_root_design { parentCell } {
 		 [get_bd_pins cpu_clk_gen/clk_in1] \
 		 [get_bd_pins cpu_reset_io_ic/ACLK] \
 		 [get_bd_pins cpu_reset_io_ic/S00_ACLK] \
-		 [get_bd_pins custom_cpu_mmio_ic/M00_ACLK]
+		 [get_bd_pins custom_cpu_mmio_ic/M00_ACLK] \
+		 [get_bd_pins custom_cpu_mmio_ic/M02_ACLK] \
+		 [get_bd_pins wall_clk_counter_wrapper/s_axi_aclk] \
+		 [get_bd_pins u_wall_clk_counter/clk]
 
   # ROLE to MEMORY CLK
   connect_bd_net [get_bd_ports role_to_mem_clk] \
@@ -356,7 +377,7 @@ proc create_root_design { parentCell } {
 
   if {${::simple_dma} == "1"} {
 	  connect_bd_net -net cpu_clk \
-	          [get_bd_pins custom_cpu_mmio_ic/M02_ACLK] \
+	          [get_bd_pins custom_cpu_mmio_ic/M03_ACLK] \
 		  [get_bd_pins dma_axi_lite_if/s_axi_aclk] \
 		  [get_bd_pins u_dma_engine/M_AXI_ACLK]
   }
@@ -370,7 +391,10 @@ proc create_root_design { parentCell } {
       [get_bd_pins cpu_clk_reset_gen/ext_reset_in] \
       [get_bd_pins cpu_reset_io_ic/ARESETN] \
       [get_bd_pins cpu_reset_io_ic/S00_ARESETN] \
-      [get_bd_pins custom_cpu_mmio_ic/M00_ARESETN]
+      [get_bd_pins custom_cpu_mmio_ic/M00_ARESETN] \
+      [get_bd_pins custom_cpu_mmio_ic/M02_ARESETN] \
+      [get_bd_pins wall_clk_counter_wrapper/s_axi_aresetn] \
+      [get_bd_pins u_wall_clk_counter/resetn]
 
   connect_bd_net [get_bd_ports role_to_mem_resetn] \
                  [get_bd_pins custom_cpu_mem_ic/ARESETN] \
@@ -397,7 +421,7 @@ proc create_root_design { parentCell } {
 
   if {${::simple_dma} == "1"} {
 	  connect_bd_net -net cpu_resetn \
-		  [get_bd_pins custom_cpu_mmio_ic/M02_ARESETN] \
+		  [get_bd_pins custom_cpu_mmio_ic/M03_ARESETN] \
 		  [get_bd_pins dma_axi_lite_if/s_axi_aresetn]
   }
 
@@ -519,6 +543,9 @@ proc create_root_design { parentCell } {
   # ROLE TO SHELL I/F
   connect_bd_intf_net [get_bd_intf_ports axi_role_to_shell] \
       [get_bd_intf_pins custom_cpu_mmio_ic/M00_AXI]
+      
+  connect_bd_intf_net [get_bd_intf_pins custom_cpu_mmio_ic/M02_AXI] \
+      [get_bd_intf_pins wall_clk_counter_wrapper/S_AXI]
 
   connect_bd_intf_net [get_bd_intf_pins custom_cpu_mmio_ic/M01_AXI] \
       [get_bd_intf_pins gpio_ic/S00_AXI]
@@ -536,7 +563,7 @@ proc create_root_design { parentCell } {
                   [get_bd_intf_pins custom_cpu_mem_ic/S02_AXI]
 
 	  connect_bd_intf_net [get_bd_intf_pins dma_axi_lite_if/S_AXI] \
-                  [get_bd_intf_pins custom_cpu_mmio_ic/M02_AXI]
+                  [get_bd_intf_pins custom_cpu_mmio_ic/M03_AXI]
   }
 
 #=============================================
@@ -555,6 +582,8 @@ proc create_root_design { parentCell } {
 
 	  incr i 1
   }
+  connect_bd_net [get_bd_pins wall_clk_counter_wrapper/gpio_io_i] \
+	[get_bd_pins u_wall_clk_counter/cnt_val]
 
 #=============================================
 # Create address segments
@@ -567,6 +596,7 @@ proc create_root_design { parentCell } {
   }
 
   create_bd_addr_seg -range 0x1000 -offset 0x60000000 [get_bd_addr_spaces ${mem_if_entity}/cpu_mem] [get_bd_addr_segs axi_role_to_shell/Reg] CPU_UART
+  create_bd_addr_seg -range 0x1000 -offset 0x60040000 [get_bd_addr_spaces ${mem_if_entity}/cpu_mem] [get_bd_addr_segs wall_clk_counter_wrapper/S_AXI/Reg] CPU_WALL_CLK_COUNTER
 
   set i 0
   set addr_base 0x60010000
