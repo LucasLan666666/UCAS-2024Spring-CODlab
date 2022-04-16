@@ -45,7 +45,12 @@ for bench in `ls $BENCH_PATH/$BENCH_SUITE/$ARCH/elf`; do
   #Launching benchmark in the list
   echo "Launching ${bench} benchmark..."
 
-  $SW_ELF_BIN $BENCH_PATH/$BENCH_SUITE/$ARCH/elf/$bench
+  if [ "$BENCH_SUITE" = "microbench" ] || [ "$BENCH_SUITE" = "hello" ] || [ "$BENCH_SUITE" = "dnn_test" ] || [ "$BENCH_SUITE" = "dma_test" ]
+  then
+	  UART=uart
+  fi
+
+  $SW_ELF_BIN $BENCH_PATH/$BENCH_SUITE/$ARCH/elf/$bench $UART
   RESULT=$?
 
   if [ $RESULT -eq 0 ]; then
