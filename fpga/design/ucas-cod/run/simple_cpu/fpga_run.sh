@@ -50,7 +50,7 @@ for bench in `ls $BENCH_PATH/$BENCH_SUITE/$ARCH/elf`; do
 	  UART=uart
   fi
 
-  $SW_ELF_BIN $BENCH_PATH/$BENCH_SUITE/$ARCH/elf/$bench $UART
+  $SW_ELF_BIN $BENCH_PATH/$BENCH_SUITE/$ARCH/elf/$bench $UART 50
   RESULT=$?
 
   if [ $RESULT -eq 0 ]; then
