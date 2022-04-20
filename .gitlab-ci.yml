@@ -1,3 +1,243 @@
 include:
   - local: 'lab_env.yml'
-  - remote: 'https://gitlab.com/zhaoran90/ucas-cod-yml/-/raw/main/ucas-cod-ci.yml'
+
+stages:
+  - src_chk
+  - bhv_sim
+  - run_syn
+  - bit_gen
+  - fpga_eval
+
+variables:
+    GIT_DEPTH: "1"
+    GIT_STRATEGY: clone
+
+workflow:
+  rules:
+    - if: '$CI_COMMIT_MESSAGE =~ /^(docs|Docs|DOCS)/'
+      when: never
+    - when: always
+
+default:
+  image: gitlab.agileserve.org.cn:15050/zelin/vivado-ci-tools/ucas-cod-2022:v0.6
+  #image: harbor.agileserve.org.cn:1121/gitlab-ci/ucas-cod-2022:v0.6
+  tags:
+    - ucas_cod
+  retry:
+    max: 2
+    when:
+      - runner_system_failure
+      - stuck_or_timeout_failure
+      - unknown_failure
+
+#=============================================================
+rtl_chk:
+  stage: src_chk
+  script:
+    - make FPGA_PRJ=ucas-cod FPGA_BD=nf FPGA_ACT=rtl_chk FPGA_VAL="role $TARGET_DESIGN" vivado_prj
+  rules:
+    - if: '$TARGET_DESIGN =~ /^(example|alu|reg_file|simple_cpu)$/'
+
+custom_cpu_chk:
+  stage: src_chk
+  script:
+    - make FPGA_PRJ=ucas-cod FPGA_BD=nf FPGA_ACT=rtl_chk FPGA_VAL="role custom_cpu_$CPU_ISA" vivado_prj
+  rules:
+    - if: '$TARGET_DESIGN == "custom_cpu"'
+
+software:
+  stage: src_chk
+  allow_failure: true
+  script:
+    - make FPGA_PRJ=ucas-cod FPGA_BD=nf OS=phy_os ARCH=$CPU_ISA workload
+  rules:
+    - if: '$TARGET_DESIGN == "custom_cpu"'
+  artifacts:
+    name: "$CI_JOB_STAGE-$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
+    paths:
+      - software/workload/ucas-cod/benchmark/simple_test/
+
+#=============================================================
+#example/alu/reg_file
+bhv_sim:
+  stage: bhv_sim
+  script:
+    - make FPGA_PRJ=ucas-cod FPGA_BD=nf SIM_TARGET=$TARGET_DESIGN bhv_sim
+  rules:
+    - if: '$TARGET_DESIGN =~ /^(example|alu|reg_file)$/'
+  artifacts:
+    name: "$CI_JOB_STAGE-$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
+    when: always
+    paths:
+      - fpga/sim_out/$TARGET_DESIGN/*.vcd
+
+#simple_cpu
+sim:
+  stage: bhv_sim
+  allow_failure: true
+  script:
+    - make FPGA_PRJ=ucas-cod FPGA_BD=nf SIM_TARGET=simple_cpu SIM_DUT=$CPU_ISA:$SIM_DUT_TYPE WORKLOAD=simple_test:$SIM_SET:$BENCH bhv_sim
+  parallel:
+    matrix:
+      - SIM_SET: basic
+        BENCH: [memcpy]
+      - SIM_SET: medium
+        BENCH: [sum,mov-c,fib,add,if-else,pascal,quick-sort,select-sort,max,min3,switch,bubble-sort]
+      - SIM_SET: advanced
+        BENCH: [shuixianhua,sub-longlong,bit,recursion,fact,add-longlong,shift,wanshu,goldbach,leap-year,prime,mul-longlong,load-store,to-lower-case,movsx,matrix-mul,unalign]
+  rules:
+    - if: '$TARGET_DESIGN == "simple_cpu"'
+  artifacts:
+    name: "$CI_JOB_STAGE-$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
+    when: on_failure
+    paths:
+      - fpga/sim_out/$TARGET_DESIGN/*.fst
+
+custom_sim:
+  stage: bhv_sim
+  allow_failure: true
+  script:
+    - make FPGA_PRJ=ucas-cod FPGA_BD=nf SIM_TARGET=custom_cpu SIM_DUT=$CPU_ISA:$SIM_DUT_TYPE WORKLOAD=simple_test:$SIM_SET:$BENCH bhv_sim
+  parallel:
+    matrix:
+      - SIM_SET: basic
+        BENCH: [memcpy]
+      - SIM_SET: medium
+        BENCH: [sum,mov-c,fib,add,if-else,pascal,quick-sort,select-sort,max,min3,switch,bubble-sort]
+      - SIM_SET: advanced
+        BENCH: [shuixianhua,sub-longlong,bit,recursion,fact,add-longlong,shift,wanshu,goldbach,leap-year,prime,mul-longlong,load-store,to-lower-case,movsx,matrix-mul,unalign]
+      - SIM_SET: hello
+        BENCH: [hello]
+  rules:
+    - if: '$TARGET_DESIGN == "custom_cpu" && $SIM_DUT_TYPE == "multi_cycle"'
+  timeout: 3 hours
+  artifacts:
+    name: "$CI_JOB_STAGE-$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
+    when: on_failure
+    paths:
+      - fpga/sim_out/$TARGET_DESIGN/*.fst
+
+turbo_sim:
+  stage: bhv_sim
+  allow_failure: true
+  script:
+    - make FPGA_PRJ=ucas-cod FPGA_BD=nf SIM_TARGET=custom_cpu SIM_DUT=$CPU_ISA:$SIM_DUT_TYPE WORKLOAD=simple_test:$SIM_SET:$BENCH bhv_sim
+  parallel:
+    matrix:
+      - SIM_SET: basic
+        BENCH: [memcpy]
+      - SIM_SET: medium
+        BENCH: [sum,mov-c,fib,add,if-else,pascal,quick-sort,select-sort,max,min3,switch,bubble-sort]
+      - SIM_SET: advanced
+        BENCH: [shuixianhua,sub-longlong,bit,recursion,fact,add-longlong,shift,wanshu,goldbach,leap-year,prime,mul-longlong,load-store,to-lower-case,movsx,matrix-mul,unalign]
+  rules:
+    - if: '$TARGET_DESIGN == "custom_cpu" && $SIM_DUT_TYPE == "turbo"'
+  timeout: 3 hours
+  artifacts:
+    name: "$CI_JOB_STAGE-$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
+    when: on_failure
+    paths:
+      - fpga/sim_out/$TARGET_DESIGN/*.fst
+
+#=============================================================
+run_syn:
+  stage: run_syn
+  script:
+    - make FPGA_PRJ=ucas-cod FPGA_BD=nf FPGA_ACT=prj_gen FPGA_VAL="role $TARGET_DESIGN" vivado_prj
+    - make FPGA_PRJ=ucas-cod FPGA_BD=nf FPGA_ACT=run_syn FPGA_VAL="role $TARGET_DESIGN" vivado_prj
+  rules:
+    - if: '$TARGET_DESIGN =~ /^(example|alu|reg_file|simple_cpu)$/'
+  dependencies:
+  artifacts:
+    name: "$CI_JOB_STAGE-$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
+    paths:
+      - fpga/vivado_out/**/synth.dcp
+      - fpga/vivado_out/**/*.rpt
+
+custom_run_syn:
+  stage: run_syn
+  script:
+    - make FPGA_PRJ=ucas-cod FPGA_BD=nf FPGA_ACT=prj_gen FPGA_VAL="role custom_cpu_$CPU_ISA" vivado_prj
+    - make FPGA_PRJ=ucas-cod FPGA_BD=nf FPGA_ACT=run_syn FPGA_VAL="role custom_cpu_$CPU_ISA" vivado_prj
+  rules:
+    - if: '$TARGET_DESIGN == "custom_cpu"'
+  dependencies:
+  artifacts:
+    name: "$CI_JOB_STAGE-$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
+    paths:
+      - fpga/vivado_out/**/synth.dcp
+      - fpga/vivado_out/**/*.rpt
+
+#=============================================================
+bit_gen:
+  stage: bit_gen
+  script:
+    - make FPGA_PRJ=ucas-cod FPGA_BD=nf FPGA_ACT=bit_gen FPGA_VAL="role $TARGET_DESIGN $ROLE" vivado_prj
+  parallel:
+    matrix:
+      - ROLE: [0, 1, 2, 3, 4]
+  rules:
+    - if: '$TARGET_DESIGN =~ /^(example|alu|reg_file|simple_cpu)$/'
+  dependencies:
+    - run_syn
+  artifacts:
+    name: "$CI_JOB_STAGE-$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
+    paths:
+      - hw_plat/**/*.bit.bin
+
+custom_bit_gen:
+  stage: bit_gen
+  script:
+    - make FPGA_PRJ=ucas-cod FPGA_BD=nf FPGA_ACT=bit_gen FPGA_VAL="role custom_cpu_$CPU_ISA $ROLE" vivado_prj
+  parallel:
+    matrix:
+      - ROLE: [0, 1, 2, 3, 4]
+  rules:
+    - if: '$TARGET_DESIGN == "custom_cpu"'
+  dependencies:
+    - custom_run_syn
+  artifacts:
+    name: "$CI_JOB_STAGE-$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
+    paths:
+      - hw_plat/**/*.bit.bin
+
+#=============================================================
+fpga_eval:
+  stage: fpga_eval
+  tags:
+    - nfv3_for_cod
+  script:
+    - bash ./fpga/design/ucas-cod/run/example/fpga_run.sh $TARGET_DESIGN
+  rules:
+    - if: '$TARGET_DESIGN =~ /^(example|alu|reg_file)$/'
+  dependencies:
+    - bit_gen
+
+simple_eval:
+  stage: fpga_eval
+  tags:
+    - nfv3_for_cod
+  script:
+    - bash ./fpga/design/ucas-cod/run/simple_cpu/fpga_run.sh $BENCH_SUITE $TARGET_DESIGN $CPU_ISA
+  parallel:
+    matrix:
+      - BENCH_SUITE: [basic, medium, advanced]
+  rules:
+    - if: '$TARGET_DESIGN == "simple_cpu"'
+  dependencies:
+    - bit_gen
+
+custom_eval:
+  stage: fpga_eval
+  tags:
+    - nfv3_for_cod
+  script:
+    - bash ./fpga/design/ucas-cod/run/simple_cpu/fpga_run.sh $BENCH_SUITE $TARGET_DESIGN $CPU_ISA
+  parallel:
+    matrix:
+      - BENCH_SUITE: [basic, medium, advanced, hello, microbench]
+  rules:
+    - if: '$TARGET_DESIGN == "custom_cpu"'
+  dependencies:
+    - custom_bit_gen
+    - software
