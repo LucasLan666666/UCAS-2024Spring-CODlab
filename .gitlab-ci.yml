@@ -205,7 +205,7 @@ custom_bit_gen:
 fpga_eval:
   stage: fpga_eval
   tags:
-    - nfv3_for_cod
+    - nfv3_for_cod_v2
   script:
     - bash ./fpga/design/ucas-cod/run/example/fpga_run.sh $TARGET_DESIGN
   rules:
@@ -216,7 +216,7 @@ fpga_eval:
 simple_eval:
   stage: fpga_eval
   tags:
-    - nfv3_for_cod
+    - nfv3_for_cod_v2
   script:
     - bash ./fpga/design/ucas-cod/run/simple_cpu/fpga_run.sh $BENCH_SUITE $TARGET_DESIGN $CPU_ISA
   parallel:
@@ -230,7 +230,7 @@ simple_eval:
 custom_eval:
   stage: fpga_eval
   tags:
-    - nfv3_for_cod
+    - nfv3_for_cod_v2
   script:
     - bash ./fpga/design/ucas-cod/run/simple_cpu/fpga_run.sh $BENCH_SUITE $TARGET_DESIGN $CPU_ISA
   parallel:
