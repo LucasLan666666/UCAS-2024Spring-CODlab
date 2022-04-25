@@ -68,6 +68,13 @@ cp $BIT_FILE $FIRMWARE_PATH
 # Step 1.2 configuration of fpga role
 echo 1 > $CONFIGFS_PATH/status
 
+sleep 2
+
+if [ `cat $CONFIGFS_PATH/status` != "1" ]; then
+  echo "FPGA configuration failed, Please retry this job."
+  exit 1
+fi
+
 echo "Completed FPGA configuration"
 
 #=============================#
