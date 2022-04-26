@@ -18,6 +18,7 @@ IV_FLAGS := -I ../
 IV_FLAGS += -I $(SIM_SRC_LOC)/$(SIM_TARGET)
 IV_FLAGS += -I $(RTL_SRC_LOC)/$(SIM_TARGET)/$(DUT_ISA)/include
 IV_FLAGS += -DTRACE_FILE=\"$(TRACE_FILE)\"
+IV_FLAGS += -grelative-include
 
 # Parsing user-defined architectural options
 ARCH_OPTION_TCL := $(RTL_SRC_LOC)/$(SIM_TARGET)/arch_options.tcl
