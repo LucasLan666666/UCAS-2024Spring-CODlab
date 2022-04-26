@@ -1,0 +1,12 @@
+`define EMU_STAT                12'h000
+`define EMU_CYCLE_LO            12'h008
+`define EMU_CYCLE_HI            12'h00c
+`define EMU_STEP                12'h010
+`define EMU_CKPT_SIZE           12'h014
+`define EMU_TRIG_STAT           12'h018
+`define EMU_TRIG_EN             12'h01c
+`define EMU_DMA_ADDR_LO         12'h020
+`define EMU_DMA_ADDR_HI         12'h024
+`define EMU_DMA_STAT            12'h028
+`define EMU_DMA_CTRL            12'h02c
+`define EMU_PUTCHAR             12'h080

@@ -1,0 +1,21 @@
+variables:
+  ### Custom CPU Emulation Flow (TARGET_DESIGN is "custom_cpu_emu") ###
+
+  # Specify benchmark suite & name to run
+  EMU_BENCH_SUITE: "microbench"
+  EMU_BENCH_NAME: "15pz"
+
+  # Specify whether a manual replay is enabled
+  # A replayed waveform file will be generated:
+  #   for EMU_REPLAY_WINDOW cycles starting from EMU_MANUAL_REPLAY_BEGIN, if set to "yes"
+  #   for the last EMU_REPLAY_WINDOW cycles before an activated trigger or timeout, if set to "no"
+  EMU_MANUAL_REPLAY_ENABLE: "no"
+
+  # Specify the beginning cycle of a manual replay window
+  EMU_MANUAL_REPLAY_BEGIN: 0
+
+  # Specify the count of last cycles to replay
+  EMU_REPLAY_WINDOW: 10000
+
+  # Timeout (in cycles)
+  EMU_TIMEOUT: 100000000000
