@@ -1,0 +1,17 @@
+ctrl:
+  base: 0x82100000
+  size: 0x00001000
+
+memory:
+  -
+    name: emu_top.u_rammodel.host_axi
+    base: 0x4880000000
+    size: 0x0010000000
+  -
+    name: emu_top.u_rammodel.lsu_axi
+    base: 0x4890000000
+    size: 0x0000010000
+  -
+    name: scanchain
+    base: 0x4890010000
+    size: 0x0000010000

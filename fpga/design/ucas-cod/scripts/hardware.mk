@@ -3,6 +3,7 @@
 SIM_SRC_LOC := fpga/design/ucas-cod/hardware/sim
 RTL_SRC_LOC := $(SIM_SRC_LOC)/../sources/
 SIM_OBJ_LOC := fpga/sim_out/$(SIM_TARGET)
+EMU_OBJ_LOC := fpga/emu_out
 
 ifneq ($(SIM_DUT),)
 DUT_ISA  := $(shell echo $(SIM_DUT) | awk -F ":" '{print $$1}')
@@ -31,7 +32,11 @@ endif
 bhv_sim:
 	@mkdir -p $(SIM_OBJ_LOC)
 	iverilog -o $(SIM_BIN) -s $(SIM_TOP) $(IV_FLAGS) $(SIM_SRCS)
-	$(SIM_BIN) +DUMP="$(SIM_DUMP)" $(PLUSARGS) | tee bhv_sim.log && bash fpga/err_det.sh bhv_sim.log
+	vvp $(VVP_FLAGS) $(SIM_BIN) +DUMP="$(SIM_DUMP)" $(PLUSARGS) | tee bhv_sim.log && bash fpga/err_det.sh bhv_sim.log
 
 wav_chk:
 	@cd fpga/design/ucas-cod/run/ && bash get_wav.sh $(SIM_TARGET) $(SIM_DUMP) $(LIKELY_BENCH)
+
+emu_transform:
+	@mkdir -p $(EMU_OBJ_LOC)
+	stdbuf -o0 yosys -c fpga/design/ucas-cod/hardware/emu/scripts/yosys.tcl

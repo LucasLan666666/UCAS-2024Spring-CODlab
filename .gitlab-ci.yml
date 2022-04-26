@@ -1,12 +1,15 @@
 include:
   - local: 'lab_env.yml'
+  - local: 'emu_settings.yml'
 
 stages:
   - src_chk
   - bhv_sim
   - run_syn
   - bit_gen
+  - reuse
   - fpga_eval
+  - wav_gen
 
 variables:
     GIT_DEPTH: "1"
@@ -50,12 +53,31 @@ software:
   allow_failure: true
   script:
     - make FPGA_PRJ=ucas-cod FPGA_BD=nf OS=phy_os ARCH=$CPU_ISA workload
+    - echo $CI_COMMIT_SHA > sw_version
   rules:
     - if: '$TARGET_DESIGN == "custom_cpu"'
+    - if: '$CI_COMMIT_MESSAGE =~ /emu-reuse-sw/'
+      when: never
+    - if: '$TARGET_DESIGN == "custom_cpu_emu"'
   artifacts:
     name: "$CI_JOB_STAGE-$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
     paths:
       - software/workload/ucas-cod/benchmark/simple_test/
+      - sw_version
+
+emu_transform:
+  image: gitlab.agileserve.org.cn:15050/ucas-cod-2021-dev/cod-lab:recheck-1.1
+  stage: src_chk
+  script:
+    - make FPGA_PRJ=ucas-cod FPGA_BD=nf emu_transform
+  rules:
+    - if: '$CI_COMMIT_MESSAGE =~ /emu-reuse-hw/'
+      when: never
+    - if: $TARGET_DESIGN == "custom_cpu_emu"
+  artifacts:
+    name: "$CI_JOB_STAGE-$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
+    paths:
+      - fpga/emu_out/
 
 #=============================================================
 #example/alu/reg_file
@@ -168,6 +190,23 @@ custom_run_syn:
       - fpga/vivado_out/**/synth.dcp
       - fpga/vivado_out/**/*.rpt
 
+emu_run_syn:
+  stage: run_syn
+  script:
+    - make FPGA_PRJ=ucas-cod FPGA_BD=nf FPGA_ACT=prj_gen FPGA_VAL="role emu" vivado_prj
+    - make FPGA_PRJ=ucas-cod FPGA_BD=nf FPGA_ACT=run_syn FPGA_VAL="role emu" vivado_prj
+  rules:
+    - if: '$CI_COMMIT_MESSAGE =~ /emu-reuse-hw/'
+      when: never
+    - if: $TARGET_DESIGN == "custom_cpu_emu"
+  dependencies:
+    - emu_transform
+  artifacts:
+    name: "$CI_JOB_STAGE-$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
+    paths:
+      - fpga/vivado_out/**/synth.dcp
+      - fpga/vivado_out/**/*.rpt
+
 #=============================================================
 bit_gen:
   stage: bit_gen
@@ -200,6 +239,59 @@ custom_bit_gen:
     name: "$CI_JOB_STAGE-$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
     paths:
       - hw_plat/**/*.bit.bin
+
+emu_bit_gen:
+  stage: bit_gen
+  script:
+    - make FPGA_PRJ=ucas-cod FPGA_BD=nf FPGA_ACT=bit_gen FPGA_VAL="role emu $ROLE" vivado_prj
+    - echo $CI_COMMIT_SHA > hw_version
+  parallel:
+    matrix:
+      - ROLE: [0, 1, 2, 3, 4]
+  rules:
+    - if: '$CI_COMMIT_MESSAGE =~ /emu-reuse-hw/'
+      when: never
+    - if: $TARGET_DESIGN == "custom_cpu_emu"
+  artifacts:
+    name: "$CI_JOB_STAGE-$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
+    paths:
+      - hw_plat/**/*.bit.bin
+      - hw_version
+  dependencies:
+    - emu_run_syn
+
+#=============================================================
+reuse_hw:
+  image: gitlab.agileserve.org.cn:15050/ucas-cod-2021-dev/cod-lab:reuse-check
+  stage: reuse
+  script:
+    - bash fpga/design/ucas-cod/run/reuse_hw.sh
+  rules:
+    - if: $TARGET_DESIGN == "custom_cpu_emu"
+  artifacts:
+    name: "$CI_JOB_STAGE-$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
+    paths:
+      - hw_version
+      - fpga/emu_out/
+      - hw_plat/**/*.bit.bin
+  dependencies:
+    - emu_transform
+    - emu_bit_gen
+
+reuse_sw:
+  image: gitlab.agileserve.org.cn:15050/ucas-cod-2021-dev/cod-lab:reuse-check
+  stage: reuse
+  script:
+    - bash fpga/design/ucas-cod/run/reuse_sw.sh
+  rules:
+    - if: $TARGET_DESIGN == "custom_cpu_emu"
+  artifacts:
+    name: "$CI_JOB_STAGE-$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
+    paths:
+      - sw_version
+      - software/workload/ucas-cod/benchmark/simple_test/
+  dependencies:
+    - software
 
 #=============================================================
 fpga_eval:
@@ -241,3 +333,36 @@ custom_eval:
   dependencies:
     - custom_bit_gen
     - software
+
+emu_run:
+  stage: fpga_eval
+  tags:
+    - nfv3_for_cod_v2
+  script:
+    - bash ./fpga/design/ucas-cod/run/emu/fpga_run.sh
+  rules:
+    - if: '$TARGET_DESIGN == "custom_cpu_emu"'
+  dependencies:
+    - reuse_hw
+    - reuse_sw
+  artifacts:
+    name: "$CI_JOB_STAGE-$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
+    paths:
+      - fpga/emu_out/dump/
+
+#=============================================================
+wav_gen:
+  image: gitlab.agileserve.org.cn:15050/ucas-cod-2021-dev/cod-lab:recheck-1.1
+  stage: wav_gen
+  script:
+    - make FPGA_PRJ=ucas-cod FPGA_BD=nf SIM_TARGET=custom_cpu_emu SIM_DUT=$CPU_ISA:$SIM_DUT_TYPE:$EMU_REPLAY_WINDOW bhv_sim
+  rules:
+    - if: '$TARGET_DESIGN == "custom_cpu_emu"'
+  artifacts:
+    name: "$CI_JOB_STAGE-$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
+    paths:
+      - fpga/sim_out/
+  dependencies:
+    - reuse_hw
+    - reuse_sw
+    - emu_run
