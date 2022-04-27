@@ -97,7 +97,7 @@ for bench in `ls $BENCH_PATH/$BENCH_SUITE/$ARCH/elf`; do
 
   if [ "$BENCH_SUITE" = "microbench" ] || [ "$BENCH_SUITE" = "hello" ] || [ "$BENCH_SUITE" = "dnn_test" ] || [ "$BENCH_SUITE" = "dma_test" ]
   then
-	  UART="uart 2"
+	  UART="uart 10"
   fi
 
   $SW_ELF_BIN $BENCH_PATH/$BENCH_SUITE/$ARCH/elf/$bench $UART
