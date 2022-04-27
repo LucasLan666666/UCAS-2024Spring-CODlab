@@ -61,7 +61,13 @@ ARCH=$3
 #============================#
 # Step 1: FPGA configuration #
 #============================#
-# Step 1.1 Copy .bit.bin and .dtbo to firmware path
+# Step 1.1 check status
+if [ `cat $CONFIGFS_PATH/status` != "0" ]; then
+  echo 0 > $CONFIGFS_PATH/status
+  sleep 2
+fi
+
+# Step 1.2 Copy .bit.bin and .dtbo to firmware path
 if [ ! -e $BIT_FILE ]; then
   echo "Error: No binary bitstream file is ready"
   exit -1
@@ -69,7 +75,7 @@ fi
 
 cp $BIT_FILE $FIRMWARE_PATH
 
-# Step 1.2 configuration of fpga role
+# Step 1.3 configuration of fpga role
 echo 1 > $CONFIGFS_PATH/status
 
 sleep 2
