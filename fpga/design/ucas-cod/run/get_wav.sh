@@ -54,7 +54,7 @@ case $SIM_TARGET in
 		JOB_NUM=`curl -s --header "PRIVATE-TOKEN: $TOKEN" "https://gitlab.agileserve.org.cn:8001/api/v4/projects/$NAMESPACE%2F$USER/pipelines/$PIP_NUM/jobs?per_page=80" | jq .[].name | grep -n -Fx \"bhv_sim\" | awk -F ":" '{print $1}'`
 	;;
 	"simple_cpu" | "custom_cpu")
-		JOB_NUM=`curl -s --header "PRIVATE-TOKEN: $TOKEN" "https://gitlab.agileserve.org.cn:8001/api/v4/projects/$NAMESPACE%2F$USER/pipelines/$PIP_NUM/jobs?per_page=80" | jq .[].name | grep -n ${BENCH}]\" | awk -F ":" '{print $1}'`
+		JOB_NUM=`curl -s --header "PRIVATE-TOKEN: $TOKEN" "https://gitlab.agileserve.org.cn:8001/api/v4/projects/$NAMESPACE%2F$USER/pipelines/$PIP_NUM/jobs?per_page=80" | jq .[].name | grep -n \ ${BENCH}]\" | awk -F ":" '{print $1}'`
 	;;
 	"custom_cpu_emu")
 		JOB_NUM=`curl -s --header "PRIVATE-TOKEN: $TOKEN" "https://gitlab.agileserve.org.cn:8001/api/v4/projects/$NAMESPACE%2F$USER/pipelines/$PIP_NUM/jobs?per_page=80" | jq .[].name | grep -n -Fx \"wav_gen\" | awk -F ":" '{print $1}'`
