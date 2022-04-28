@@ -1,4 +1,4 @@
-`timescale 10ns / 1ns
+`timescale 1ns / 1ps
 
 module simple_cpu_test
 ();
