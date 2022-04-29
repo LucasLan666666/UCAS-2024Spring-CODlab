@@ -24,20 +24,14 @@ if [ $PID != $$ ];then
         exit 1;
 fi
 
-if [ -f $CNT_FILE ];then
-        CNT=`cat $CNT_FILE`
-        if (( $CNT < 4 ));then
-                CNT_NEXT=`expr $CNT + 1`
-        else
-                CNT_NEXT=0
-        fi
-        echo $CNT_NEXT > $CNT_FILE
-        echo "RUNNER_CNT = $CNT"
-else
-        echo 0 > $CNT_FILE
-        CNT=`cat $CNT_FILE`
-        echo "RUNNER_CNT = $CNT"
-fi
+for i in {0..4};do
+  if [ ! -f /root/lock_$i ];then
+    CNT=$i
+    touch /root/lock_$CNT
+    echo "RUNNER_CNT = $CNT"
+    break
+  fi
+done
 
 rm -f $LOCK_FILE
 
@@ -95,6 +89,7 @@ RET=$?
 #rmdir $CONFIGFS_PATH
 #rm -f $FIRMWARE_PATH/$BIT_FILE_BIN
 echo 0 > $CONFIGFS_PATH/status
+rm -f /root/lock_$CNT
 
 #=======================
 # Step 4: Check if all benchmarks passed
