@@ -223,6 +223,7 @@ bit_gen:
     name: "$CI_JOB_STAGE-$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
     paths:
       - hw_plat/**/*.bit.bin
+      - fpga/vivado_out/**/post_route*.rpt
 
 custom_bit_gen:
   stage: bit_gen
@@ -239,6 +240,7 @@ custom_bit_gen:
     name: "$CI_JOB_STAGE-$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
     paths:
       - hw_plat/**/*.bit.bin
+      - fpga/vivado_out/**/post_route*.rpt
 
 emu_bit_gen:
   stage: bit_gen
