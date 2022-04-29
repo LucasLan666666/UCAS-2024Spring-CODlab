@@ -8,7 +8,7 @@ stages:
   - run_syn
   - bit_gen
   - reuse
-  - fpga_eval
+  - fpga_run
   - wav_gen
 
 variables:
@@ -295,7 +295,7 @@ reuse_sw:
 
 #=============================================================
 fpga_eval:
-  stage: fpga_eval
+  stage: fpga_run
   tags:
     - nfv3_for_cod_v2
   script:
@@ -306,7 +306,7 @@ fpga_eval:
     - bit_gen
 
 simple_eval:
-  stage: fpga_eval
+  stage: fpga_run
   tags:
     - nfv3_for_cod_v2
   script:
@@ -320,7 +320,7 @@ simple_eval:
     - bit_gen
 
 custom_eval:
-  stage: fpga_eval
+  stage: fpga_run
   tags:
     - nfv3_for_cod_v2
   script:
@@ -335,7 +335,7 @@ custom_eval:
     - software
 
 emu_run:
-  stage: fpga_eval
+  stage: fpga_run
   tags:
     - nfv3_for_cod_v2
   script:
