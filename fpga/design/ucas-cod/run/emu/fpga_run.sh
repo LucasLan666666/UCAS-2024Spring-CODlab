@@ -24,20 +24,14 @@ if [ $PID != $$ ];then
         exit 1;
 fi
 
-if [ -f $CNT_FILE ];then
-        CNT=`cat $CNT_FILE`
-        if (( $CNT < 4 ));then
-                CNT_NEXT=`expr $CNT + 1`
-        else
-                CNT_NEXT=0
-        fi
-        echo $CNT_NEXT > $CNT_FILE
-        echo "RUNNER_CNT = $CNT"
-else
-        echo 0 > $CNT_FILE
-        CNT=`cat $CNT_FILE`
-        echo "RUNNER_CNT = $CNT"
-fi
+for i in {0..4};do
+  if [ ! -f /root/lock_$i ];then
+    CNT=$i
+    touch /root/lock_$CNT
+    echo "RUNNER_CNT = $CNT"
+    break
+  fi
+done
 
 rm -f $LOCK_FILE
 
@@ -61,7 +55,13 @@ EMU_DUMP_PATH=fpga/emu_out/dump
 #============================#
 # Step 1: FPGA configuration #
 #============================#
-# Step 1.1 Copy .bit.bin and .dtbo to firmware path
+# Step 1.1 check status
+if [ `cat $CONFIGFS_PATH/status` != "0" ]; then
+  echo 0 > $CONFIGFS_PATH/status
+  sleep 2
+fi
+
+# Step 1.2 Copy .bit.bin and .dtbo to firmware path
 if [ ! -e $BIT_FILE ]; then
   echo "Error: No binary bitstream file is ready"
   exit -1
@@ -69,8 +69,15 @@ fi
 
 cp $BIT_FILE $FIRMWARE_PATH
 
-# Step 1.2 configuration of fpga role
+# Step 1.3 configuration of fpga role
 echo 1 > $CONFIGFS_PATH/status
+
+sleep 2
+
+if [ `cat $CONFIGFS_PATH/status` != "1" ]; then
+  echo "FPGA configuration failed, Please retry this job."
+  exit 1
+fi
 
 echo "Completed FPGA configuration"
 
@@ -100,6 +107,7 @@ if [ -f $BENCH_BIN ]; then
       --dump $EMU_DUMP_PATH \
       $EMU_CONFIG $EMU_CKPT_PATH
   fi
+  RESULT=$?
 
   python3 software/workload/ucas-cod/host/emu/firewall.py --check $CNT
 
@@ -113,3 +121,8 @@ fi
 #rmdir $CONFIGFS_PATH
 #rm -f $FIRMWARE_PATH/$BIT_FILE_BIN
 echo 0 > $CONFIGFS_PATH/status
+rm -f /root/lock_$CNT
+
+if [ $RESULT -ne 0 ]; then
+        exit 1
+fi
