@@ -69,6 +69,7 @@ echo "Completed FPGA configuration"
 #=============================#
 # Step 2: Software evaluation #
 #=============================#
+RESULT=1
 if [ -f $BENCH_BIN ]; then
 
   source /opt/rh/rh-python38/enable
