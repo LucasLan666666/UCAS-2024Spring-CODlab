@@ -1,39 +1,24 @@
 #!/bin/env bash
 
-CNT_FILE="/root/cnt"
-LOCK_FILE="/root/lock"
-
 #======================#
 # Step 0: Get Role cnt #
 #======================#
-while true
-do
-        if [ ! -f $LOCK_FILE ];then
-                echo $$>$LOCK_FILE
-                break
-        else
-                sleep 1
-                echo lock
-        fi
-done
+CNT=
 
-PID=`cat $LOCK_FILE`
-
-if [ $PID != $$ ];then
-        echo "Please retry this job!"
-        exit 1;
-fi
-
-for i in {0..4};do
-  if [ ! -f /root/lock_$i ];then
+for i in {0..4}; do
+  LOCK_FILE=/run/role_$i.lock
+  exec {LOCK_FD}<>$LOCK_FILE
+  if flock -n $LOCK_FD; then
     CNT=$i
-    touch /root/lock_$CNT
     echo "RUNNER_CNT = $CNT"
     break
   fi
 done
 
-rm -f $LOCK_FILE
+if [ -z $CNT ]; then
+  echo Please retry this job!
+  exit 1
+fi
 
 #======================#
 
@@ -121,7 +106,6 @@ echo "pass $N_PASSED / $N_TESTED"
 #rmdir $CONFIGFS_PATH
 #rm -f $FIRMWARE_PATH/$BIT_FILE_BIN
 echo 0 > $CONFIGFS_PATH/status
-rm -f /root/lock_$CNT
 
 #=======================
 # Step 4: Check if all benchmarks passed
