@@ -27,6 +27,7 @@ ARCH_OPTION_TCL := $(RTL_SRC_LOC)/custom_cpu/arch_options.tcl
 
 USE_ICACHE     := $(shell cat $(ARCH_OPTION_TCL) | grep "icache" | awk '{print $$3}')
 USE_DCACHE     := $(shell cat $(ARCH_OPTION_TCL) | grep "dcache" | awk '{print $$3}')
+USE_DMA        := $(shell cat $(ARCH_OPTION_TCL) | grep "simple_dma" | awk '{print $$3}')
 
 ifeq ($(USE_ICACHE),1)
 IV_FLAGS += -DUSE_ICACHE
@@ -34,6 +35,10 @@ endif
 
 ifeq ($(USE_DCACHE),1)
 IV_FLAGS += -DUSE_DCACHE
+endif
+
+ifeq ($(USE_DMA),1)
+IV_FLAGS += -DUSE_DMA
 endif
 
 VVP_FLAGS += $(shell recheck --vvp-flags)

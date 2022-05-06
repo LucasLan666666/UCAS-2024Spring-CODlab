@@ -14,6 +14,10 @@ if {${dcache} == "1"} {
     yosys verilog_defines -DUSE_DCACHE
 }
 
+if {${simple_dma} == "1"} {
+    yosys verilog_defines -DUSE_DMA
+}
+
 if {${dut} == "multi_cycle"} {
     yosys verilog_defines -DTRACECMP_MULTI_CYCLE
 }

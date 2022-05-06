@@ -56,6 +56,8 @@ module emu_top();
     wire [31:0] cpu_perf_cnt_14;
     wire [31:0] cpu_perf_cnt_15;
 
+    wire intr;
+
     custom_cpu u_cpu (    
         .clk                (clk),
         .rst                (rst),
@@ -78,6 +80,8 @@ module emu_top();
         .Read_data          (Read_data    ),
         .Read_data_Valid    (Read_data_Valid),
         .Read_data_Ready    (Read_data_Ready),
+
+        .intr               (intr),
 
         .cpu_perf_cnt_0     (cpu_perf_cnt_0 ),
         .cpu_perf_cnt_1     (cpu_perf_cnt_1 ),
@@ -376,9 +380,80 @@ module emu_top();
 
 `ifdef USE_DMA
 
+	wire [8:0]   reg_addr;
+	wire [31:0]  reg_wdata;
+	wire         reg_write;
+	wire [31:0]  reg_rdata;
+
+    dma_ctrl u_dma_ctrl(
+        .clk                (clk),
+        .rst                (rst),
+        `AXI4LITE_CONNECT   (s_axilite, dma_mmio),
+        .reg_addr           (reg_addr ),
+        .reg_wdata          (reg_wdata),
+        .reg_write          (reg_write),
+        .reg_rdata          (reg_rdata)
+    );
+
     `AXI4_WIRE  (dma_dram, 32, 32, 1);
 
-    // TODO: dma module instantiation
+    wire [7:0] __unused_dma_aw, __unused_dma_ar;
+
+    dma_engine #(
+        .C_M_AXI_DATA_WIDTH (32),
+        .ADDR_WIDTH         (12)
+    )
+    u_dma (
+        .M_AXI_ACLK         (clk),
+        .M_AXI_ARESET       (rst),
+        .reg_addr           (reg_addr),
+        .reg_wdata          (reg_wdata),
+        .reg_write          (reg_write),
+        .reg_rdata          (reg_rdata),
+        .intr               (intr),
+        .M_AXI_AWADDR       ({__unused_dma_aw, dma_dram_awaddr}),
+        .M_AXI_AWLEN        (dma_dram_awlen),
+        .M_AXI_AWBURST      (dma_dram_awburst),
+        .M_AXI_AWSIZE       (dma_dram_awsize),
+        .M_AXI_AWVALID      (dma_dram_awvalid),
+        .M_AXI_AWREADY      (dma_dram_awready),
+        .M_AXI_WDATA        (dma_dram_wdata),
+        .M_AXI_WLAST        (dma_dram_wlast),
+        .M_AXI_WSTRB        (dma_dram_wstrb),
+        .M_AXI_WVALID       (dma_dram_wvalid),
+        .M_AXI_WREADY       (dma_dram_wready),
+        .M_AXI_ARADDR       (dma_dram_araddr),
+        .M_AXI_ARLEN        (dma_dram_arlen),
+        .M_AXI_ARBURST      (dma_dram_arburst),
+        .M_AXI_ARSIZE       (dma_dram_arsize),
+        .M_AXI_ARVALID      (dma_dram_arvalid),
+        .M_AXI_ARREADY      (dma_dram_arready),
+        .M_AXI_RDATA        (dma_dram_rdata),
+        .M_AXI_RLAST        (dma_dram_rlast),
+        .M_AXI_RVALID       (dma_dram_rvalid),
+        .M_AXI_RRESP        (dma_dram_rresp),
+        .M_AXI_RREADY       (dma_dram_rready),
+        .M_AXI_BREADY       (dma_dram_bready),
+        .M_AXI_BRESP        (dma_dram_bresp),
+        .M_AXI_BVALID       (dma_dram_bvalid)
+    );
+
+    assign dma_dram_arid         = 1'd0;
+    assign dma_dram_arprot       = 3'd2;
+    assign dma_dram_arlock       = 1'd0;
+    assign dma_dram_arcache      = 4'd0;
+    assign dma_dram_arregion     = 4'd0;
+    assign dma_dram_arqos        = 4'd0;
+    assign dma_dram_awid         = 1'd0;
+    assign dma_dram_awprot       = 3'd2;
+    assign dma_dram_awlock       = 1'd0;
+    assign dma_dram_awcache      = 4'd0;
+    assign dma_dram_awregion     = 4'd0;
+    assign dma_dram_awqos        = 4'd0;
+
+`else
+
+    assign intr = 1'b0;
 
 `endif
 
