@@ -66,7 +66,7 @@ software:
       - sw_version
 
 emu_transform:
-  image: gitlab.agileserve.org.cn:15050/ucas-cod-2021-dev/cod-lab:recheck-1.1
+  image: gitlab.agileserve.org.cn:15050/ucas-cod-2021-dev/cod-lab:recheck-1.2
   stage: src_chk
   script:
     - make FPGA_PRJ=ucas-cod FPGA_BD=nf emu_transform
@@ -354,7 +354,7 @@ emu_run:
 
 #=============================================================
 wav_gen:
-  image: gitlab.agileserve.org.cn:15050/ucas-cod-2021-dev/cod-lab:recheck-1.1
+  image: gitlab.agileserve.org.cn:15050/ucas-cod-2021-dev/cod-lab:recheck-1.2
   stage: wav_gen
   script:
     - make FPGA_PRJ=ucas-cod FPGA_BD=nf SIM_TARGET=custom_cpu_emu SIM_DUT=$CPU_ISA:$SIM_DUT_TYPE:$EMU_REPLAY_WINDOW bhv_sim
