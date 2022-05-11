@@ -255,7 +255,7 @@ module emu_controller #(
         if (rst) begin
             emu_trig_stat       <= 32'd0;
         end
-        else begin
+        else if (emu_dut_clk_en) begin
             emu_trig_stat       <= emu_dut_trig;
         end
     end

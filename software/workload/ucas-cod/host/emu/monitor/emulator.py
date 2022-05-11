@@ -98,19 +98,6 @@ class Emulator:
         for i in range(32):
             self.__mon.set_trigger_enable(i, False)
 
-    def __check_user_trig(self):
-        triggered = False
-        for i in range(32):
-            if self.__mon.get_trigger_status(i) and self.__mon.get_trigger_enable(i):
-                triggered = True
-        return triggered
-
-    def __list_user_trig(self):
-        for i in range(32):
-            if self.__mon.get_trigger_status(i) and self.__mon.get_trigger_enable(i):
-                cycle = self.__mon.cycle
-                print(f"[EMU] Cycle {cycle}: user trigger {i} activated at previous cycle")
-
     def __event_add(self, event: EmulatorEvent):
         bisect.insort(self.__event_list, event)
 
@@ -127,6 +114,7 @@ class Emulator:
     async def __event_loop(self):
         await self.__mon.putchar_start()
         dry_run = True
+
         while True:
             cycle = self.__mon.cycle
             if len(self.__event_list) == 0:
@@ -142,9 +130,9 @@ class Emulator:
                 self.__mon.cycle = event.cycle
             else:
                 if delta > 0:
-                    await self.__mon.run_for(delta)
-                if self.__check_user_trig():
-                    break
+                    result = await self.__mon.run_for(delta)
+                    if not result:
+                        break
 
             self.__event_pop()
             await event.execute(self.__mon)
@@ -156,8 +144,13 @@ class Emulator:
                     break
                 elif isinstance(event, _PeriodicalSaveEvent):
                     self.__event_add(_PeriodicalSaveEvent(event.cycle + self.checkpoint_period, self.__ckptmgr))
+
         await self.__mon.putchar_stop()
-        self.__list_user_trig()
+
+        for i in range(32):
+            if self.__mon.get_trigger_status(i) and self.__mon.get_trigger_enable(i):
+                cycle = self.__mon.cycle
+                print(f"[EMU] Cycle {cycle}: user trigger {i} activated at previous cycle")
 
     async def run(self, period=0, timeout=None):
         print("[EMU] Run from initial state")
