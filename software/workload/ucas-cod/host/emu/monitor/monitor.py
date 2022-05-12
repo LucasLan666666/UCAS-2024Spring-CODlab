@@ -56,11 +56,11 @@ class Monitor:
     def get_trigger_status(self, key: int):
         return get_bit(self.__ctrl.trig_stat, key)
 
-    async def run_for(self, cycle: int, ignore_trig: bool = False):
-        old_trig_en = self.__ctrl.trig_en
-        if ignore_trig:
-            self.__ctrl.trig_en = 0
+    def is_triggered(self):
+        masked_trigger = self.__ctrl.trig_en & self.__ctrl.trig_stat
+        return masked_trigger != 0
 
+    async def run_for(self, cycle: int):
         while cycle > 0:
             step = min(cycle, 0xffffffff)
             cycle -= step
@@ -70,7 +70,10 @@ class Monitor:
             while not self.__ctrl.pause:
                 await asyncio.sleep(0.1)
 
-        self.__ctrl.trig_en = old_trig_en
+            if self.is_triggered():
+                return False
+
+        return True
 
     async def __go_up(self):
         self.__ctrl.up_req = True
