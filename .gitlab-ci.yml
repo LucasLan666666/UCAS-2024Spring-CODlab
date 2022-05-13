@@ -299,7 +299,7 @@ reuse_sw:
 fpga_eval:
   stage: fpga_run
   tags:
-    - nfv3_for_cod_v4
+    - nfv3_for_cod_v5
   script:
     - bash ./fpga/design/ucas-cod/run/example/fpga_run.sh $TARGET_DESIGN
   rules:
@@ -310,7 +310,7 @@ fpga_eval:
 simple_eval:
   stage: fpga_run
   tags:
-    - nfv3_for_cod_v4
+    - nfv3_for_cod_v5
   script:
     - bash ./fpga/design/ucas-cod/run/simple_cpu/fpga_run.sh $BENCH_SUITE $TARGET_DESIGN $CPU_ISA
   parallel:
@@ -324,7 +324,7 @@ simple_eval:
 custom_eval:
   stage: fpga_run
   tags:
-    - nfv3_for_cod_v4
+    - nfv3_for_cod_v5
   script:
     - bash ./fpga/design/ucas-cod/run/simple_cpu/fpga_run.sh $BENCH_SUITE $TARGET_DESIGN $CPU_ISA
   parallel:
@@ -339,7 +339,7 @@ custom_eval:
 emu_run:
   stage: fpga_run
   tags:
-    - nfv3_for_cod_v4
+    - nfv3_for_cod_v5
   script:
     - bash ./fpga/design/ucas-cod/run/emu/fpga_run.sh
   rules:
