@@ -332,7 +332,7 @@ custom_eval:
     matrix:
       - BENCH_SUITE: [basic, medium, advanced, hello, microbench]
   rules:
-    - if: '$TARGET_DESIGN == "custom_cpu"'
+    - if: '$TARGET_DESIGN == "custom_cpu" && ($SIM_DUT_TYPE == "multi_cycle" || $SIM_DUT_TYPE == "turbo")'
   dependencies:
     - custom_bit_gen
     - software
