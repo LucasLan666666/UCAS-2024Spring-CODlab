@@ -34,7 +34,7 @@ CONFIGFS_PATH=/sys/kernel/config/device-tree/overlays/role_$CNT
 SW_ELF_BIN=./software/workload/ucas-cod/host/$2/elf/loader_$CNT
 
 BENCH_PATH=./software/workload/ucas-cod/benchmark/simple_test
-BENCH_SUITE=$1
+BENCH_SUITE=`echo $1 | awk -F ":" '{print $1}'`
 ARCH=$3
 
 #============================#
@@ -76,13 +76,25 @@ fi
 N_PASSED=0
 N_TESTED=0
 
-for bench in `ls $BENCH_PATH/$BENCH_SUITE/$ARCH/elf`; do
+BENCH_TEST=`echo $1 | awk -F ":" '{print $2}'`
+
+if [ $BENCH_TEST = "" ]
+then
+BENCH=`ls $BENCH_PATH/$BENCH_SUITE/$ARCH/elf`
+else
+BENCH=${BENCH_TEST}
+fi
+
+for bench in ${BENCH}; do
   #Launching benchmark in the list
   echo "Launching ${bench} benchmark..."
 
-  if [ "$BENCH_SUITE" = "microbench" ] || [ "$BENCH_SUITE" = "hello" ] || [ "$BENCH_SUITE" = "dnn_test" ] || [ "$BENCH_SUITE" = "dma_test" ]
+  if [ "$BENCH_SUITE" = "microbench" ] || [ "$BENCH_SUITE" = "hello" ]
   then
 	  UART="uart 10"
+  elif [ "$BENCH_SUITE" = "dnn_test" ] || [ "$BENCH_SUITE" = "dma_test" ]
+  then
+	  UART="uart 20"
   fi
 
   $SW_ELF_BIN $BENCH_PATH/$BENCH_SUITE/$ARCH/elf/$bench $UART

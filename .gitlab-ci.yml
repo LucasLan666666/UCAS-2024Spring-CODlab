@@ -241,6 +241,7 @@ custom_bit_gen:
     paths:
       - hw_plat/**/*.bit.bin
       - fpga/vivado_out/**/post_route*.rpt
+      - fpga/vivado_out/**/opt_timing*.rpt
 
 emu_bit_gen:
   stage: bit_gen
@@ -332,6 +333,38 @@ custom_eval:
       - BENCH_SUITE: [basic, medium, advanced, hello, microbench]
   rules:
     - if: '$TARGET_DESIGN == "custom_cpu"'
+  dependencies:
+    - custom_bit_gen
+    - software
+
+dnn_eval:
+  stage: fpga_run
+  tags:
+    - nfv3_for_cod_v5
+  script:
+    - bash ./fpga/design/ucas-cod/run/simple_cpu/fpga_run.sh $BENCH_SUITE:$BENCH $TARGET_DESIGN $CPU_ISA
+  parallel:
+    matrix:
+      - BENCH_SUITE: [dnn_test]
+        BENCH: [sw_conv,sw_conv_mul,hw_conv]
+  rules:
+    - if: '$TARGET_DESIGN == "custom_cpu" && $SIM_DUT_TYPE == "dnn_test"'
+  dependencies:
+    - custom_bit_gen
+    - software
+
+dma_eval:
+  stage: fpga_run
+  tags:
+    - nfv3_for_cod_v5
+  script:
+    - bash ./fpga/design/ucas-cod/run/simple_cpu/fpga_run.sh $BENCH_SUITE:$BENCH $TARGET_DESIGN $CPU_ISA
+  parallel:
+    matrix:
+      - BENCH_SUITE: [dma_test]
+        BENCH: [data_mover_no_dma,data_mover_dma]
+  rules:
+    - if: '$TARGET_DESIGN == "custom_cpu" && $SIM_DUT_TYPE == "dma_test"'
   dependencies:
     - custom_bit_gen
     - software
