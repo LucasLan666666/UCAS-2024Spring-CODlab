@@ -148,7 +148,7 @@ endmodule
 (* top =  1  *)
 (* src = "custom_cpu_mips.v:112.1-596.10" *)
 module custom_cpu_golden(rst, clk, PC, Inst_Req_Valid, Inst_Req_Ready, Instruction, Inst_Valid, Inst_Ready, Address, MemWrite, Write_data, Write_strb, MemRead, Mem_Req_Ready, Read_data, Read_data_Valid, Read_data_Ready, cpu_perf_cnt_0, cpu_perf_cnt_1, cpu_perf_cnt_2, cpu_perf_cnt_3
-, cpu_perf_cnt_4, cpu_perf_cnt_5, cpu_perf_cnt_6, cpu_perf_cnt_7, cpu_perf_cnt_8, cpu_perf_cnt_9, cpu_perf_cnt_10, cpu_perf_cnt_11, cpu_perf_cnt_12, cpu_perf_cnt_13, cpu_perf_cnt_14, cpu_perf_cnt_15);
+, cpu_perf_cnt_4, cpu_perf_cnt_5, cpu_perf_cnt_6, cpu_perf_cnt_7, cpu_perf_cnt_8, cpu_perf_cnt_9, cpu_perf_cnt_10, cpu_perf_cnt_11, cpu_perf_cnt_12, cpu_perf_cnt_13, cpu_perf_cnt_14, cpu_perf_cnt_15, inst_retire);
   (* src = "custom_cpu_mips.v:411.2-426.5" *)
   wire [31:0] _000_;
   (* src = "custom_cpu_mips.v:403.2-408.5" *)
@@ -884,6 +884,7 @@ module custom_cpu_golden(rst, clk, PC, Inst_Req_Valid, Inst_Req_Ready, Instructi
   reg [31:0] tot_Inst_cnt;
   (* src = "custom_cpu_mips.v:244.8-244.14" *)
   wire unsign;
+  output [69:0] inst_retire;
   assign _029_ = cycle_cnt + (* src = "custom_cpu_mips.v:497.17-497.34" *) 1'h1;
   assign _030_ = mem_acc_waiting_cycle_cnt + (* src = "custom_cpu_mips.v:506.33-506.66" *) 1'h1;
   assign _031_ = rtype_algor_Inst_cnt + (* src = "custom_cpu_mips.v:515.28-515.56" *) 1'h1;
@@ -1345,6 +1346,11 @@ module custom_cpu_golden(rst, clk, PC, Inst_Req_Valid, Inst_Req_Ready, Instructi
   assign rt = IR[20:16];
   assign shamt = IR[10:6];
   assign target = IR[25:0];
+  reg [31:0] commit_pc;
+  always @(posedge clk)
+    if (Inst_Req_Valid && Inst_Req_Ready)
+      commit_pc <= PC;
+  assign inst_retire = {RF_wen, RF_waddr, RF_wdata, commit_pc};
 endmodule
 
 (* src = "custom_cpu_mips.v:60.1-86.10" *)

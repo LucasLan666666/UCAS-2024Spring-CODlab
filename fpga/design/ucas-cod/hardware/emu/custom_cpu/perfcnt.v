@@ -75,7 +75,7 @@ module perfcnt(
             W_STATE_AXI_AW: w_state_next = awfire ? W_STATE_AXI_W : W_STATE_AXI_AW;
             W_STATE_AXI_W:  w_state_next = wfire ? W_STATE_WRITE : W_STATE_AXI_W;
             W_STATE_WRITE:  w_state_next = W_STATE_AXI_B;
-            W_STATE_AXI_B:  w_state_next = bfire ? W_STATE_AXI_AW : W_STATE_AXI_W;
+            W_STATE_AXI_B:  w_state_next = bfire ? W_STATE_AXI_AW : W_STATE_AXI_B;
             default:        w_state_next = W_STATE_AXI_AW;
         endcase
     end

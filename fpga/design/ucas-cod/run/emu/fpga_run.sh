@@ -76,6 +76,11 @@ echo "Completed FPGA configuration"
 # Step 2: Software evaluation #
 #=============================#
 RESULT=1
+
+if [ $SIM_DUT_TYPE == "turbo" ]; then
+  TURBO="--turbo"
+fi
+
 if [ -f $BENCH_BIN ]; then
 
   source /opt/rh/rh-python38/enable
@@ -86,17 +91,18 @@ if [ -f $BENCH_BIN ]; then
 
   rm -rf $EMU_CKPT_PATH
   if [ $EMU_MANUAL_REPLAY_ENABLE == "yes" ]; then
-    python3 -m monitor \
+    python3 software/workload/ucas-cod/host/emu/run_emu.py \
       --initmem emu_top.u_rammodel.host_axi $BENCH_BIN \
       --to $EMU_MANUAL_REPLAY_BEGIN \
       --dump $EMU_DUMP_PATH \
       $EMU_CONFIG $EMU_CKPT_PATH
   else
-    python3 -m monitor \
+    python3 software/workload/ucas-cod/host/emu/run_emu.py \
       --initmem emu_top.u_rammodel.host_axi $BENCH_BIN \
       --timeout $EMU_TIMEOUT \
       --rewind $EMU_REPLAY_WINDOW \
       --dump $EMU_DUMP_PATH \
+      $TURBO \
       $EMU_CONFIG $EMU_CKPT_PATH
   fi
   RESULT=$?
