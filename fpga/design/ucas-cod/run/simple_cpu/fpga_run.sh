@@ -78,7 +78,7 @@ N_TESTED=0
 
 BENCH_TEST=`echo $1 | awk -F ":" '{print $2}'`
 
-if [ $BENCH_TEST = "" ]
+if [[ $BENCH_TEST = "" ]]
 then
 BENCH=`ls $BENCH_PATH/$BENCH_SUITE/$ARCH/elf`
 else
