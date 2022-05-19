@@ -30,8 +30,8 @@
 #define KERN_ATTR_POOL_STRIDE 2
 
 //MMIO register address of DNN accelerator
-#define GPIO_START_ADDR		0x40040000
-#define GPIO_DONE_ADDR		0x40040008
+#define GPIO_START_ADDR    0x60030000
+#define GPIO_DONE_ADDR     0x60030008
 
 struct size_vec4
 {
@@ -138,7 +138,18 @@ void pooling()
 	}
 
 	//TODO: Please add your implementation here
+
 }
+
+#ifdef USE_HW_ACCEL
+void launch_hw_accel()
+{
+	volatile int* gpio_start = (void*)(GPIO_START_ADDR);
+	volatile int* gpio_done = (void*)(GPIO_DONE_ADDR);
+
+	//TODO: Please add your implementation here
+}
+#endif
 
 int comparing()
 {
@@ -162,17 +173,10 @@ int comparing()
 
 int main()
 {
-#ifdef USE_HW_ACCEL
-	volatile int* gpio_start = (void*)(GPIO_START_ADDR);
-	volatile int* gpio_done = (void*)(GPIO_DONE_ADDR);
-#endif
 
 #ifdef USE_HW_ACCEL
 	printf("Launching task...\n");
-	*gpio_start = 1;
-	*gpio_start = 0;
-
-	while(*(gpio_done) != 1);
+	launch_hw_accel();
 #else
 	printf("starting convolution\n");
 	convolution();
