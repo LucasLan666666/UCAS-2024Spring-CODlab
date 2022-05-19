@@ -31,7 +31,13 @@ MANAGER_PATH=/sys/class/fpga_manager/fpga0
 
 CONFIGFS_PATH=/sys/kernel/config/device-tree/overlays/role_$CNT
 
+BENCH_ELF=software/workload/ucas-cod/benchmark/simple_test/$EMU_BENCH_SUITE/$CPU_ISA/elf/$EMU_BENCH_NAME
 BENCH_BIN=software/workload/ucas-cod/benchmark/simple_test/$EMU_BENCH_SUITE/$CPU_ISA/bin/$EMU_BENCH_NAME.bin
+
+if [ -f $BENCH_ELF ]; then
+  echo "Using benchmark $EMU_BENCH_SUITE:$EMU_BENCH_NAME"
+  objcopy -S -I elf32-little -O binary $BENCH_ELF $BENCH_BIN
+fi
 
 EMU_CONFIG=software/workload/ucas-cod/host/emu/config/role_$CNT.yml
 EMU_CKPT_PATH=fpga/emu_out/ckpt_store
@@ -98,7 +104,7 @@ if [ -f $BENCH_BIN ]; then
   python3 software/workload/ucas-cod/host/emu/firewall.py --check $CNT
 
 else
-  echo "Incorrect benchmark suite or name"
+  echo "Error: Benchmark $EMU_BENCH_SUITE:$EMU_BENCH_NAME is not found"
 fi
 
 #=============================#
