@@ -45,18 +45,8 @@ all: $(ELFS)
 $(ARCH)/elf/%: $(OBJS) $(ARCH)/obj/%/conv.o $(ARCH)/obj/data/%/data.o $(ARCH)/obj/data/%/weight.o $(ARCH)/obj/data/%/result.o
 	@mkdir -p $(DIR_OBJS)
 	$(LD) $(LDFLAGS) -o $@ $^
-	#@cd $(ARCH) && \
-		$(OBJDUMP) -DS ../$@ > disassembly/$(patsubst $(ARCH)/elf/%,%,$@).S && \
-		$(OBJCOPY) -S -O binary \
-		    -j .text -j .text.startup -j .MIPS.abiflags \
-		    -j .data -j .rodata -j .sdata -j .rodata.str1.4 \
-		    -j .bss --set-section-flags .bss=alloc,contents \
-		    -j .sbss --set-section-flags .sbss=alloc,contents \
-			-j .input.data -j .input.weight -j .input.result \
-		    -j .scommon --set-section-flags .scommon=alloc,contents \
-		    ../$@ bin/$(patsubst $(ARCH)/elf/%,%,$@).bin
-	#@cd $(ARCH) && xxd -e -c 4 bin/$(patsubst $(ARCH)/elf/%,%,$@).bin | awk -F ":" '{print $$2}' | awk -F " " '{print $$1}' \
-				> sim/$(patsubst $(ARCH)/elf/%,%,$@).mem
+	@cd $(ARCH) && \
+		$(OBJDUMP) -DS ../$@ > disassembly/$(patsubst $(ARCH)/elf/%,%,$@).S
 
 $(ARCH)/obj/%/conv.o: src/conv.c
 	@mkdir -p $(DIR_OBJS)
