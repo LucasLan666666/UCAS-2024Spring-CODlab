@@ -94,7 +94,7 @@ for bench in ${BENCH}; do
 	  UART="uart 10"
   elif [ "$BENCH_SUITE" = "dnn_test" ] || [ "$BENCH_SUITE" = "dma_test" ]
   then
-	  UART="uart 20"
+	  UART="uart 1000"
   fi
 
   $SW_ELF_BIN $BENCH_PATH/$BENCH_SUITE/$ARCH/elf/$bench $UART
