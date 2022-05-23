@@ -156,15 +156,26 @@ int comparing()
 	char *out = (char *)addr.wr_addr;
 	char *result = (char *)_binary_data_result_bin_start;
 
+#ifdef USE_HW_ACCEL
+	int count = (int)_binary_data_result_bin_size + 
+		    (16 - WR_SIZE_D3) * 2 * WR_SIZE_D2 * WR_SIZE_D1;
+#else
 	int count = (int)_binary_data_result_bin_size;
+#endif
 
-	for (int i = 0; i < count; i++)
+	for (int i = 0, j = 0; i < count; i++)
 	{
-		if (*(out + i) != *(result + i))
+#ifdef USE_HW_ACCEL
+		int alignment = i & 0x0000001f;
+		if (alignment >= (WR_SIZE_D3 << 1))
+			continue;
+#endif
+		if (*(out + i) != *(result + j))
 		{
-			printf("Failed! at address %x and %x with data %x and %x\n", out + i, result + i, *(out + i), *(result + i));
+			printf("Failed! at address %x and %x with data %x and %x\n", out + i, result + j, *(out + i), *(result + j));
 			return 1;
 		}
+		j++;
 	}
 
 	printf("Passed!\n");
