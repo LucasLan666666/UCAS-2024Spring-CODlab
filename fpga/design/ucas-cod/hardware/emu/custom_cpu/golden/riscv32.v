@@ -935,7 +935,6 @@ module custom_cpu_golden(rst, clk, PC, Inst_Req_Valid, Inst_Req_Ready, Instructi
     .raddr2(IR[24:20]),
     .rdata1(RF_rdata1),
     .rdata2(RF_rdata2),
-    .rst(rst),
     .waddr(IR[11:7]),
     .wdata(RF_wdata),
     .wen(RF_wen)
@@ -972,79 +971,51 @@ module custom_cpu_golden(rst, clk, PC, Inst_Req_Valid, Inst_Req_Ready, Instructi
   assign inst_retire = {RF_wen, RF_waddr, RF_wdata, commit_pc};
 endmodule
 
-(* src = "custom_cpu_riscv32.v:61.1-87.10" *)
-module reg_file_golden(clk, rst, waddr, raddr1, raddr2, wen, wdata, rdata1, rdata2);
-  (* src = "custom_cpu_riscv32.v:77.2-82.5" *)
-  wire [4:0] _00_;
-  (* src = "custom_cpu_riscv32.v:77.2-82.5" *)
-  wire [31:0] _01_;
-  (* src = "custom_cpu_riscv32.v:77.2-82.5" *)
-  wire [31:0] _02_;
-  (* src = "custom_cpu_riscv32.v:77.2-82.5" *)
-  wire [4:0] _03_;
-  (* src = "custom_cpu_riscv32.v:77.2-82.5" *)
-  wire [31:0] _04_;
-  (* src = "custom_cpu_riscv32.v:77.2-82.5" *)
-  wire [31:0] _05_;
-  (* src = "custom_cpu_riscv32.v:78.6-78.18" *)
-  wire _06_;
-  (* src = "custom_cpu_riscv32.v:81.23-81.31" *)
-  wire [31:0] _07_;
-  (* src = "custom_cpu_riscv32.v:84.34-84.42" *)
-  wire [31:0] _08_;
-  (* src = "custom_cpu_riscv32.v:85.34-85.42" *)
-  wire [31:0] _09_;
-  (* src = "custom_cpu_riscv32.v:78.6-78.12" *)
-  wire _10_;
-  (* src = "custom_cpu_riscv32.v:84.22-84.29" *)
-  wire _11_;
-  (* src = "custom_cpu_riscv32.v:85.22-85.29" *)
-  wire _12_;
-  (* src = "custom_cpu_riscv32.v:62.8-62.11" *)
+(* src = "reg_file_golden.v:6.1-23.10" *)
+module reg_file_golden(clk, waddr, raddr1, raddr2, wen, wdata, rdata1, rdata2);
+  (* src = "reg_file_golden.v:20.28-20.31" *)
+  wire [31:0] _0_;
+  (* src = "reg_file_golden.v:21.28-21.31" *)
+  wire [31:0] _1_;
+  (* src = "reg_file_golden.v:20.19-20.43" *)
+  wire _2_;
+  (* src = "reg_file_golden.v:21.19-21.43" *)
+  wire _3_;
+  (* src = "reg_file_golden.v:7.30-7.33" *)
   input clk;
-  (* src = "custom_cpu_riscv32.v:65.18-65.24" *)
+  wire clk;
+  (* src = "reg_file_golden.v:9.20-9.26" *)
   input [4:0] raddr1;
-  (* src = "custom_cpu_riscv32.v:66.18-66.24" *)
+  wire [4:0] raddr1;
+  (* src = "reg_file_golden.v:10.20-10.26" *)
   input [4:0] raddr2;
-  (* src = "custom_cpu_riscv32.v:69.20-69.26" *)
+  wire [4:0] raddr2;
+  (* src = "reg_file_golden.v:13.21-13.27" *)
   output [31:0] rdata1;
-  (* src = "custom_cpu_riscv32.v:70.20-70.26" *)
+  wire [31:0] rdata1;
+  (* src = "reg_file_golden.v:14.21-14.27" *)
   output [31:0] rdata2;
-  (* src = "custom_cpu_riscv32.v:63.8-63.11" *)
-  input rst;
-  (* src = "custom_cpu_riscv32.v:64.18-64.23" *)
+  wire [31:0] rdata2;
+  (* src = "reg_file_golden.v:8.20-8.25" *)
   input [4:0] waddr;
-  (* src = "custom_cpu_riscv32.v:68.19-68.24" *)
+  wire [4:0] waddr;
+  (* src = "reg_file_golden.v:12.21-12.26" *)
   input [31:0] wdata;
-  (* src = "custom_cpu_riscv32.v:67.8-67.11" *)
+  wire [31:0] wdata;
+  (* src = "reg_file_golden.v:11.30-11.33" *)
   input wen;
-  (* src = "custom_cpu_riscv32.v:75.13-75.21" *)
-  reg [31:0] register [31:0];
+  wire wen;
+  (* src = "reg_file_golden.v:18.14-18.17" *)
+  reg [31:0] ram [31:0];
   always @(posedge clk) begin
-    if (_02_[31])
-      register[_00_] <= _01_;
+    ram[waddr] <= wdata;
   end
-  always @(posedge clk) begin
-    if (_05_[31])
-      register[_03_] <= _04_;
-  end
-  assign _09_ = register[raddr2];
-  assign _08_ = register[raddr1];
-  assign _07_ = register[waddr];
-  assign _06_ = _10_ & (* src = "custom_cpu_riscv32.v:78.6-78.18" *) wen;
-  assign rdata1 = { _11_, _11_, _11_, _11_, _11_, _11_, _11_, _11_, _11_, _11_, _11_, _11_, _11_, _11_, _11_, _11_, _11_, _11_, _11_, _11_, _11_, _11_, _11_, _11_, _11_, _11_, _11_, _11_, _11_, _11_, _11_, _11_ } & (* src = "custom_cpu_riscv32.v:84.18-84.50" *) _08_;
-  assign rdata2 = { _12_, _12_, _12_, _12_, _12_, _12_, _12_, _12_, _12_, _12_, _12_, _12_, _12_, _12_, _12_, _12_, _12_, _12_, _12_, _12_, _12_, _12_, _12_, _12_, _12_, _12_, _12_, _12_, _12_, _12_, _12_, _12_ } & (* src = "custom_cpu_riscv32.v:85.18-85.50" *) _09_;
-  assign _02_[31] = _06_ ? (* full_case = 32'd1 *) (* src = "custom_cpu_riscv32.v:78.6-78.18|custom_cpu_riscv32.v:78.3-81.39" *) 1'h1 : 1'h0;
-  assign _01_ = _06_ ? (* full_case = 32'd1 *) (* src = "custom_cpu_riscv32.v:78.6-78.18|custom_cpu_riscv32.v:78.3-81.39" *) wdata : 32'hxxxxxxxx;
-  assign _00_ = _06_ ? (* full_case = 32'd1 *) (* src = "custom_cpu_riscv32.v:78.6-78.18|custom_cpu_riscv32.v:78.3-81.39" *) waddr : 5'hxx;
-  assign _05_[31] = _06_ ? (* full_case = 32'd1 *) (* src = "custom_cpu_riscv32.v:78.6-78.18|custom_cpu_riscv32.v:78.3-81.39" *) 1'h0 : 1'h1;
-  assign _04_ = _06_ ? (* full_case = 32'd1 *) (* src = "custom_cpu_riscv32.v:78.6-78.18|custom_cpu_riscv32.v:78.3-81.39" *) 32'hxxxxxxxx : _07_;
-  assign _03_ = _06_ ? (* full_case = 32'd1 *) (* src = "custom_cpu_riscv32.v:78.6-78.18|custom_cpu_riscv32.v:78.3-81.39" *) 5'hxx : waddr;
-  assign _10_ = | (* src = "custom_cpu_riscv32.v:78.6-78.12" *) waddr;
-  assign _11_ = | (* src = "custom_cpu_riscv32.v:84.22-84.29" *) raddr1;
-  assign _12_ = | (* src = "custom_cpu_riscv32.v:85.22-85.29" *) raddr2;
-  assign _02_[30:0] = { _02_[31], _02_[31], _02_[31], _02_[31], _02_[31], _02_[31], _02_[31], _02_[31], _02_[31], _02_[31], _02_[31], _02_[31], _02_[31], _02_[31], _02_[31], _02_[31], _02_[31], _02_[31], _02_[31], _02_[31], _02_[31], _02_[31], _02_[31], _02_[31], _02_[31], _02_[31], _02_[31], _02_[31], _02_[31], _02_[31], _02_[31] };
-  assign _05_[30:0] = { _05_[31], _05_[31], _05_[31], _05_[31], _05_[31], _05_[31], _05_[31], _05_[31], _05_[31], _05_[31], _05_[31], _05_[31], _05_[31], _05_[31], _05_[31], _05_[31], _05_[31], _05_[31], _05_[31], _05_[31], _05_[31], _05_[31], _05_[31], _05_[31], _05_[31], _05_[31], _05_[31], _05_[31], _05_[31], _05_[31], _05_[31] };
+  assign _1_ = ram[raddr2];
+  assign _0_ = ram[raddr1];
+  assign _2_ = | (* src = "reg_file_golden.v:20.19-20.43" *) raddr1;
+  assign _3_ = | (* src = "reg_file_golden.v:21.19-21.43" *) raddr2;
+  assign rdata1 = _2_ ? (* src = "reg_file_golden.v:20.19-20.43" *) _0_ : 32'd0;
+  assign rdata2 = _3_ ? (* src = "reg_file_golden.v:21.19-21.43" *) _1_ : 32'd0;
 endmodule
 
 (* src = "custom_cpu_riscv32.v:89.1-111.10" *)
