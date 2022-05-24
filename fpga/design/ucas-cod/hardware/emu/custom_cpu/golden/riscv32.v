@@ -660,7 +660,7 @@ module custom_cpu_golden(rst, clk, PC, Inst_Req_Valid, Inst_Req_Ready, Instructi
   wire [4:0] rs2;
   (* src = "custom_cpu_riscv32.v:114.9-114.12" *)
   input rst;
-  output [69:0] inst_retire
+  output [69:0] inst_retire;
   assign _014_ = PC + (* src = "custom_cpu_riscv32.v:374.11-374.27" *) { IR[31], IR[31], IR[31], IR[31], IR[31], IR[31], IR[31], IR[31], IR[31], IR[31], IR[31], IR[31], IR[31], IR[31], IR[31], IR[31], IR[31], IR[31], IR[31], IR[31], IR[7], IR[30:25], IR[11:8], 1'h0 };
   assign _015_ = PC + (* src = "custom_cpu_riscv32.v:387.15-387.21" *) 3'h4;
   assign _016_ = _112_ & (* src = "custom_cpu_riscv32.v:217.21-217.43" *) IR[4];
