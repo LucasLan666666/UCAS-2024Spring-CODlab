@@ -26,6 +26,8 @@ class Monitor:
         self.__putchar_task = None
         self.__putchar_running = False
 
+        self.__stop_flag = False
+
     @property
     def mem(self):
         return self.__mem
@@ -56,9 +58,9 @@ class Monitor:
     def get_trigger_status(self, key: int):
         return get_bit(self.__ctrl.trig_stat, key)
 
-    def is_triggered(self):
-        masked_trigger = self.__ctrl.trig_en & self.__ctrl.trig_stat
-        return masked_trigger != 0
+    def stop(self):
+        self.__stop_flag = True
+        self.__ctrl.pause = True
 
     async def run_for(self, cycle: int):
         while cycle > 0:
@@ -70,7 +72,12 @@ class Monitor:
             while not self.__ctrl.pause:
                 await asyncio.sleep(0.1)
 
-            if self.is_triggered():
+            if self.__stop_flag:
+                self.__stop_flag = False
+                return False
+
+            masked_trigger = self.__ctrl.trig_en & self.__ctrl.trig_stat
+            if masked_trigger != 0:
                 return False
 
         return True

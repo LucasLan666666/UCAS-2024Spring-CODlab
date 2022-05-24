@@ -148,7 +148,7 @@ endmodule
 (* top =  1  *)
 (* src = "custom_cpu_riscv32.v:113.1-448.10" *)
 module custom_cpu_golden(rst, clk, PC, Inst_Req_Valid, Inst_Req_Ready, Instruction, Inst_Valid, Inst_Ready, Address, MemWrite, Write_data, Write_strb, MemRead, Mem_Req_Ready, Read_data, Read_data_Valid, Read_data_Ready, cpu_perf_cnt_0, cpu_perf_cnt_1, cpu_perf_cnt_2, cpu_perf_cnt_3
-, cpu_perf_cnt_4, cpu_perf_cnt_5, cpu_perf_cnt_6, cpu_perf_cnt_7, cpu_perf_cnt_8, cpu_perf_cnt_9, cpu_perf_cnt_10, cpu_perf_cnt_11, cpu_perf_cnt_12, cpu_perf_cnt_13, cpu_perf_cnt_14, cpu_perf_cnt_15);
+, cpu_perf_cnt_4, cpu_perf_cnt_5, cpu_perf_cnt_6, cpu_perf_cnt_7, cpu_perf_cnt_8, cpu_perf_cnt_9, cpu_perf_cnt_10, cpu_perf_cnt_11, cpu_perf_cnt_12, cpu_perf_cnt_13, cpu_perf_cnt_14, cpu_perf_cnt_15, inst_retire);
   (* src = "custom_cpu_riscv32.v:391.2-396.5" *)
   wire [31:0] _000_;
   (* src = "custom_cpu_riscv32.v:399.2-412.5" *)
@@ -660,6 +660,7 @@ module custom_cpu_golden(rst, clk, PC, Inst_Req_Valid, Inst_Req_Ready, Instructi
   wire [4:0] rs2;
   (* src = "custom_cpu_riscv32.v:114.9-114.12" *)
   input rst;
+  output [69:0] inst_retire
   assign _014_ = PC + (* src = "custom_cpu_riscv32.v:374.11-374.27" *) { IR[31], IR[31], IR[31], IR[31], IR[31], IR[31], IR[31], IR[31], IR[31], IR[31], IR[31], IR[31], IR[31], IR[31], IR[31], IR[31], IR[31], IR[31], IR[31], IR[31], IR[7], IR[30:25], IR[11:8], 1'h0 };
   assign _015_ = PC + (* src = "custom_cpu_riscv32.v:387.15-387.21" *) 3'h4;
   assign _016_ = _112_ & (* src = "custom_cpu_riscv32.v:217.21-217.43" *) IR[4];
@@ -964,6 +965,11 @@ module custom_cpu_golden(rst, clk, PC, Inst_Req_Valid, Inst_Req_Ready, Instructi
   assign rd = IR[11:7];
   assign rs1 = IR[19:15];
   assign rs2 = IR[24:20];
+  reg [31:0] commit_pc;
+  always @(posedge clk)
+    if (Inst_Req_Valid && Inst_Req_Ready)
+      commit_pc <= PC;
+  assign inst_retire = {RF_wen, RF_waddr, RF_wdata, commit_pc};
 endmodule
 
 (* src = "custom_cpu_riscv32.v:61.1-87.10" *)

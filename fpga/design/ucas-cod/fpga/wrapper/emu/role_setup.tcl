@@ -1,3 +1,6 @@
+set cpu_isa $env(CPU_ISA)
+set sim_dut_type $env(SIM_DUT_TYPE)
+
 # add top module of ROLE region
 add_files -norecurse -fileset sources_1 ${script_dir}/../design/${prj}/fpga/sources/hdl/custom_role.v
 
@@ -7,6 +10,9 @@ add_files -norecurse -fileset sources_1 ${script_dir}/../emu_out/emu_dut.v
 # add files for FPGA
 add_files -norecurse -fileset sources_1 ${script_dir}/../design/${prj}/hardware/emu/include/
 add_files -norecurse -fileset sources_1 ${script_dir}/../design/${prj}/hardware/emu/fpga_srcs/
+add_files -norecurse -fileset sources_1 ${script_dir}/../design/${prj}/hardware/emu/custom_cpu/
+add_files -norecurse -fileset sources_1 ${script_dir}/../design/${prj}/hardware/emu/custom_cpu/golden/${cpu_isa}.v
+add_files -norecurse -fileset sources_1 ${script_dir}/../design/${prj}/hardware/wrapper/custom_cpu/
 
 # setup block design
 set bd_design role

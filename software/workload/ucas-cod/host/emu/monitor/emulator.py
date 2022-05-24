@@ -180,6 +180,9 @@ class Emulator:
             self.__event_add(_BreakEvent(cycle + timeout))
         await self.__event_loop()
 
+    def stop(self):
+        self.__mon.stop()
+
     async def save(self, file: str):
         with Checkpoint(file) as cp:
             await self.__mon.save(cp)
