@@ -1354,14 +1354,20 @@ endmodule
 
 (* src = "reg_file_golden.v:6.1-23.10" *)
 module reg_file_golden(clk, waddr, raddr1, raddr2, wen, wdata, rdata1, rdata2);
+  (* src = "reg_file_golden.v:19.3-19.54" *)
+  wire [4:0] _00_;
+  (* src = "reg_file_golden.v:19.3-19.54" *)
+  wire [31:0] _01_;
+  (* src = "reg_file_golden.v:19.3-19.54" *)
+  wire [31:0] _02_;
   (* src = "reg_file_golden.v:20.28-20.31" *)
-  wire [31:0] _0_;
+  wire [31:0] _03_;
   (* src = "reg_file_golden.v:21.28-21.31" *)
-  wire [31:0] _1_;
+  wire [31:0] _04_;
   (* src = "reg_file_golden.v:20.19-20.43" *)
-  wire _2_;
+  wire _05_;
   (* src = "reg_file_golden.v:21.19-21.43" *)
-  wire _3_;
+  wire _06_;
   (* src = "reg_file_golden.v:7.30-7.33" *)
   input clk;
   wire clk;
@@ -1389,14 +1395,19 @@ module reg_file_golden(clk, waddr, raddr1, raddr2, wen, wdata, rdata1, rdata2);
   (* src = "reg_file_golden.v:18.14-18.17" *)
   reg [31:0] ram [31:0];
   always @(posedge clk) begin
-    ram[waddr] <= wdata;
+    if (_02_[31])
+      ram[_00_] <= _01_;
   end
-  assign _1_ = ram[raddr2];
-  assign _0_ = ram[raddr1];
-  assign _2_ = | (* src = "reg_file_golden.v:20.19-20.43" *) raddr1;
-  assign _3_ = | (* src = "reg_file_golden.v:21.19-21.43" *) raddr2;
-  assign rdata1 = _2_ ? (* src = "reg_file_golden.v:20.19-20.43" *) _0_ : 32'd0;
-  assign rdata2 = _3_ ? (* src = "reg_file_golden.v:21.19-21.43" *) _1_ : 32'd0;
+  assign _04_ = ram[raddr2];
+  assign _03_ = ram[raddr1];
+  assign _02_[31] = wen ? (* full_case = 32'd1 *) (* src = "reg_file_golden.v:19.29-19.32|reg_file_golden.v:19.25-19.54" *) 1'h1 : 1'h0;
+  assign _01_ = wen ? (* full_case = 32'd1 *) (* src = "reg_file_golden.v:19.29-19.32|reg_file_golden.v:19.25-19.54" *) wdata : 32'hxxxxxxxx;
+  assign _00_ = wen ? (* full_case = 32'd1 *) (* src = "reg_file_golden.v:19.29-19.32|reg_file_golden.v:19.25-19.54" *) waddr : 5'hxx;
+  assign _05_ = | (* src = "reg_file_golden.v:20.19-20.43" *) raddr1;
+  assign _06_ = | (* src = "reg_file_golden.v:21.19-21.43" *) raddr2;
+  assign rdata1 = _05_ ? (* src = "reg_file_golden.v:20.19-20.43" *) _03_ : 32'd0;
+  assign rdata2 = _06_ ? (* src = "reg_file_golden.v:21.19-21.43" *) _04_ : 32'd0;
+  assign _02_[30:0] = { _02_[31], _02_[31], _02_[31], _02_[31], _02_[31], _02_[31], _02_[31], _02_[31], _02_[31], _02_[31], _02_[31], _02_[31], _02_[31], _02_[31], _02_[31], _02_[31], _02_[31], _02_[31], _02_[31], _02_[31], _02_[31], _02_[31], _02_[31], _02_[31], _02_[31], _02_[31], _02_[31], _02_[31], _02_[31], _02_[31], _02_[31] };
 endmodule
 
 (* src = "custom_cpu_mips.v:88.1-110.10" *)
