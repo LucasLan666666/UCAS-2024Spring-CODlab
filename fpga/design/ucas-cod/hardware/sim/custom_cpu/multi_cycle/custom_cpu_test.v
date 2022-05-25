@@ -131,12 +131,22 @@ module custom_cpu_test
 				$finish;
 			end
 
-			else if ((`MEM_READ == 1'b1 | `MEM_WEN == 1'b1) & (`MEM_ADDR_GOLDEN[31:2] !== `MEM_ADDR[31:2]))
+			else if ((`MEM_READ == 1'b1) & (`MEM_ADDR_GOLDEN[31:2] !== `MEM_ADDR[31:2]))
 			begin
 				$display("=================================================");
 				$display("ERROR: at %dns, PC = 0x%h.", $time, `PC);
 				$display("Yours:     MemRead Address & 0xfffffffc = 0x%h", {`MEM_ADDR[31:2],        2'b0});
 				$display("Reference: MemRead Address & 0xfffffffc = 0x%h", {`MEM_ADDR_GOLDEN[31:2], 2'b0});
+				$display("=================================================");
+				$finish;
+			end
+
+			else if ((`MEM_WEN == 1'b1) & (`MEM_ADDR_GOLDEN[31:2] !== `MEM_ADDR[31:2]))
+			begin
+				$display("=================================================");
+				$display("ERROR: at %dns, PC = 0x%h.", $time, `PC);
+				$display("Yours:     MemWrite Address & 0xfffffffc = 0x%h", {`MEM_ADDR[31:2],        2'b0});
+				$display("Reference: MemWrite Address & 0xfffffffc = 0x%h", {`MEM_ADDR_GOLDEN[31:2], 2'b0});
 				$display("=================================================");
 				$finish;
 			end
