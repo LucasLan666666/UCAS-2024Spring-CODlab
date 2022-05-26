@@ -3,16 +3,15 @@
 
 `include "axi.vh"
 
-module dma_ctrl(
+module turbo_trace_cmp_mmio_model(
     input  wire         clk,
     input  wire         rst,
 
     `AXI4LITE_SLAVE_IF  (s_axilite, 32, 32),
 
-    output wire [8:0]   reg_addr,
-    output wire [31:0]  reg_wdata,
-    output wire         reg_write,
-    input  wire [31:0]  reg_rdata
+    input  wire         rdata_trace_valid,
+    output wire         rdata_trace_ready,
+    input  wire [31:0]  rdata_trace_data
 );
 
     wire arfire = s_axilite_arvalid && s_axilite_arready;
@@ -20,6 +19,8 @@ module dma_ctrl(
     wire awfire = s_axilite_awvalid && s_axilite_awready;
     wire wfire  = s_axilite_wvalid && s_axilite_wready;
     wire bfire  = s_axilite_bvalid && s_axilite_bready;
+
+    wire rdata_trace_fire = rdata_trace_valid && rdata_trace_ready;
 
     localparam [1:0]
         R_STATE_AXI_AR  = 2'd0,
@@ -45,7 +46,7 @@ module dma_ctrl(
     always @* begin
         case (r_state)
             R_STATE_AXI_AR: r_state_next = arfire ? R_STATE_READ : R_STATE_AXI_AR;
-            R_STATE_READ:   r_state_next = R_STATE_AXI_R;
+            R_STATE_READ:   r_state_next = rdata_trace_fire ? R_STATE_AXI_R : R_STATE_READ;
             R_STATE_AXI_R:  r_state_next = rfire ? R_STATE_AXI_AR : R_STATE_AXI_R;
             default:        r_state_next = R_STATE_AXI_AR;
         endcase
@@ -68,14 +69,16 @@ module dma_ctrl(
         endcase
     end
 
-    reg [15:0] addr;
+    reg [15:0] read_addr, write_addr;
     reg [31:0] write_data;
 
     always @(posedge clk)
         if (arfire)
-            addr <= s_axilite_araddr[15:0];
-        else if (awfire)
-            addr <= s_axilite_awaddr[15:0];
+            read_addr <= s_axilite_araddr[15:0];
+
+    always @(posedge clk)
+        if (awfire)
+            write_addr <= s_axilite_awaddr[15:0];
 
     wire [31:0] extended_wstrb = {
         {8{s_axilite_wstrb[3]}},
@@ -94,9 +97,11 @@ module dma_ctrl(
 
     always @(posedge clk) begin
         if (r_state == R_STATE_READ) begin
-            read_data <= reg_rdata;
+            read_data <= rdata_trace_data;
         end
     end
+
+    assign rdata_trace_ready    = r_state == R_STATE_READ;
 
     assign s_axilite_arready    = r_state == R_STATE_AXI_AR;
     assign s_axilite_rvalid     = r_state == R_STATE_AXI_R;
@@ -104,10 +109,6 @@ module dma_ctrl(
     assign s_axilite_rresp      = 2'd0;
 
     // Write logic
-
-    assign reg_addr             = addr[11:3];
-    assign reg_write            = w_state == W_STATE_WRITE;
-    assign reg_wdata            = write_data;
 
     assign s_axilite_awready    = w_state == W_STATE_AXI_AW;
     assign s_axilite_wready     = w_state == W_STATE_AXI_W;

@@ -58,6 +58,8 @@ module emu_top();
 
     wire intr;
 
+    wire [69:0] inst_retire;
+
     custom_cpu u_cpu (    
         .clk                (clk),
         .rst                (rst),
@@ -98,7 +100,9 @@ module emu_top();
         .cpu_perf_cnt_12    (cpu_perf_cnt_12),
         .cpu_perf_cnt_13    (cpu_perf_cnt_13),
         .cpu_perf_cnt_14    (cpu_perf_cnt_14),
-        .cpu_perf_cnt_15    (cpu_perf_cnt_15)
+        .cpu_perf_cnt_15    (cpu_perf_cnt_15),
+
+        .inst_retire        (inst_retire)
     );
 
     assign trap = MemWrite && Address == 32'hc;
@@ -175,6 +179,22 @@ module emu_top();
     };
 
 `endif
+
+    EmuTrace #(
+        .DATA_WIDTH(69)
+    ) trace_commit (
+        .clk    (clk),
+        .valid  (inst_retire[69]),
+        .data   (inst_retire[68:0])
+    );
+
+    EmuTrace #(
+        .DATA_WIDTH(32)
+    ) trace_mmio_rdata (
+        .clk    (clk),
+        .valid  (cpu_mmio_lite_rvalid && cpu_mmio_lite_rready),
+        .data   (cpu_mmio_lite_rdata)
+    );
 
     `AXI4_AR_WIRE   (cpu_inst,  32, 32, 1);
     `AXI4_R_WIRE    (cpu_inst,  32, 32, 1);
