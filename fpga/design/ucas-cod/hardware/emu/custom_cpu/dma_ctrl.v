@@ -9,7 +9,7 @@ module dma_ctrl(
 
     `AXI4LITE_SLAVE_IF  (s_axilite, 32, 32),
 
-    output wire [8:0]   reg_addr,
+    output wire [9:0]   reg_addr,
     output wire [31:0]  reg_wdata,
     output wire         reg_write,
     input  wire [31:0]  reg_rdata
@@ -105,7 +105,7 @@ module dma_ctrl(
 
     // Write logic
 
-    assign reg_addr             = addr[11:3];
+    assign reg_addr             = addr[11:2];
     assign reg_write            = w_state == W_STATE_WRITE;
     assign reg_wdata            = write_data;
 

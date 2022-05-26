@@ -400,7 +400,7 @@ module emu_top();
 
 `ifdef USE_DMA
 
-	wire [8:0]   reg_addr;
+	wire [9:0]   reg_addr;
 	wire [31:0]  reg_wdata;
 	wire         reg_write;
 	wire [31:0]  reg_rdata;
