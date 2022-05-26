@@ -88,9 +88,10 @@ int main()
 #endif
 
 	//start buffer writing
+	printf("Prepare SW data mover\n");
 	setup_buf();
 
-	printf("Data mover done\n");
+	printf("benchmark finished\n");
 	return 0;
 }
 
