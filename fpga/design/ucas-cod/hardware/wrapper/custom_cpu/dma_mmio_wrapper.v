@@ -3,7 +3,7 @@ module dma_mmio_wrapper (
 	input  [ 3:0]    bram_we_a,
 	input  [11:0]    bram_addr_a,
 
-	output [ 0:0]    reg_addr,
+	output [ 9:0]    reg_addr,
 	output [ 0:0]    reg_write
 );
 
