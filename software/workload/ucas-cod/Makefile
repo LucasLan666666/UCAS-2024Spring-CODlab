@@ -2,7 +2,7 @@
 EXPORT_CC_PATH := export PATH=$(COMPILER_PATH):$$PATH
 
 # MIPS 32 or RISC-V 32 benchmarks on simple CPU prototyping
-obj-y := simple_test
+obj-y := perf_test simple_test
 obj-bench-y := $(foreach obj,$(obj-y),$(obj).bench)
 obj-bench-clean-y := $(foreach obj,$(obj-y),$(obj).clean)
 
