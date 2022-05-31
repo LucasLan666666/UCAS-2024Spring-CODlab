@@ -63,6 +63,7 @@ software:
     name: "$CI_JOB_STAGE-$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
     paths:
       - software/workload/ucas-cod/benchmark/simple_test/
+      - software/workload/ucas-cod/benchmark/perf_test/
       - sw_version
 
 emu_transform:
@@ -333,6 +334,21 @@ custom_eval:
       - BENCH_SUITE: [basic, medium, advanced, hello, microbench]
   rules:
     - if: '$TARGET_DESIGN == "custom_cpu" && ($SIM_DUT_TYPE == "multi_cycle" || $SIM_DUT_TYPE == "turbo")'
+  dependencies:
+    - custom_bit_gen
+    - software
+
+turbo_eval:
+  stage: fpga_run
+  tags:
+    - nfv3_for_cod_v5
+  script:
+    - bash ./fpga/design/ucas-cod/run/turbo_cpu/fpga_run.sh $BENCH_SUITE $TARGET_DESIGN $CPU_ISA
+  parallel:
+    matrix:
+      - BENCH_SUITE: [coremark, dhrystone]
+  rules:
+    - if: '$TARGET_DESIGN == "custom_cpu" && $SIM_DUT_TYPE == "turbo"'
   dependencies:
     - custom_bit_gen
     - software
