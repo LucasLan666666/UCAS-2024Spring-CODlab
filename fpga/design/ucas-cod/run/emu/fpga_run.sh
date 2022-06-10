@@ -31,8 +31,13 @@ MANAGER_PATH=/sys/class/fpga_manager/fpga0
 
 CONFIGFS_PATH=/sys/kernel/config/device-tree/overlays/role_$CNT
 
-BENCH_ELF=software/workload/ucas-cod/benchmark/simple_test/$EMU_BENCH_SUITE/$CPU_ISA/elf/$EMU_BENCH_NAME
-BENCH_BIN=software/workload/ucas-cod/benchmark/simple_test/$EMU_BENCH_SUITE/$CPU_ISA/bin/$EMU_BENCH_NAME.bin
+if [[ $EMU_BENCH_SUITE == "coremark" || $EMU_BENCH_SUITE == "dhrystone" ]]; then
+  BENCH_ELF=software/workload/ucas-cod/benchmark/perf_test/$EMU_BENCH_SUITE/$CPU_ISA/elf/$EMU_BENCH_NAME
+  BENCH_BIN=software/workload/ucas-cod/benchmark/perf_test/$EMU_BENCH_SUITE/$CPU_ISA/bin/$EMU_BENCH_NAME.bin
+else
+  BENCH_ELF=software/workload/ucas-cod/benchmark/simple_test/$EMU_BENCH_SUITE/$CPU_ISA/elf/$EMU_BENCH_NAME
+  BENCH_BIN=software/workload/ucas-cod/benchmark/simple_test/$EMU_BENCH_SUITE/$CPU_ISA/bin/$EMU_BENCH_NAME.bin
+fi
 
 if [ -f $BENCH_ELF ]; then
   echo "Using benchmark $EMU_BENCH_SUITE:$EMU_BENCH_NAME"
