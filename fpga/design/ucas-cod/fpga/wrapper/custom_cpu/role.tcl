@@ -242,7 +242,11 @@ proc create_root_design { parentCell } {
   set_property -dict [ list CONFIG.C_ALL_INPUTS {1} \
 			CONFIG.C_ALL_OUTPUTS {0} \
 			CONFIG.C_GPIO_WIDTH {32} \
-			CONFIG.C_IS_DUAL {0} ] $wall_clk_counter_wrapper
+			CONFIG.C_IS_DUAL {1} \
+			CONFIG.C_ALL_INPUTS_2 {0} \
+			CONFIG.C_ALL_OUTPUTS_2 {1} \
+			CONFIG.C_GPIO2_WIDTH {1} \
+			CONFIG.C_DOUT_DEFAULT {0x1} ] $wall_clk_counter_wrapper
 
   # Create RTL block: wall_clk_counter
   set block_name wall_clk_counter
@@ -632,6 +636,9 @@ proc create_root_design { parentCell } {
   }
   connect_bd_net [get_bd_pins wall_clk_counter_wrapper/gpio_io_i] \
 	[get_bd_pins u_wall_clk_counter/cnt_val]
+	  
+  connect_bd_net [get_bd_pins u_wall_clk_counter/cnt_clear] \
+	[get_bd_pins wall_clk_counter_wrapper/gpio2_io_o]
 
   if {${::dnn_acc} != "0"} {
 	  connect_bd_net [get_bd_pins u_dnn_acc_top/gpio_acc_start] \
