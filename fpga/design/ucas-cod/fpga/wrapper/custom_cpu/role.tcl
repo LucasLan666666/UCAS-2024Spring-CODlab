@@ -127,6 +127,9 @@ proc create_root_design { parentCell } {
   set custom_cpu_mem_ic [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_interconnect:2.1 custom_cpu_mem_ic ]
   set_property -dict [list CONFIG.NUM_MI {1} CONFIG.NUM_SI {4}] $custom_cpu_mem_ic
 
+  # set cpu freq in HZ
+  set cpu_freq_hz ${::cpu_freq}000000
+
   if {${::simple_dma} == "1"} {
 	  # Create instance: DMA MMIO register interface
 	  set dma_axi_lite_if [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_bram_ctrl:4.1 dma_axi_lite_if ]
@@ -154,6 +157,8 @@ proc create_root_design { parentCell } {
 		   catch {common::send_msg_id "BD_TCL-106" "ERROR" "Unable to referenced block <$block_name>. Please add the files for ${block_name}'s definition into the project."}
 		   return 1
 	  }
+	  set_property CONFIG.FREQ_HZ ${cpu_freq_hz} [get_bd_pins u_dma_engine/M_AXI_ACLK]
+	  set_property CONFIG.FREQ_HZ ${cpu_freq_hz} [get_bd_intf_pins u_dma_engine/M_AXI]
   }
 
   if {${::dnn_acc} != "0"} {
@@ -183,6 +188,9 @@ proc create_root_design { parentCell } {
 		  catch {common::send_msg_id "BD_TCL-106" "ERROR" "Unable to referenced block <$block_name>. Please add the files for ${block_name}'s definition into the project."}
 		  return 1
 	  }
+
+	  set_property CONFIG.FREQ_HZ ${cpu_freq_hz} [get_bd_pins u_dnn_acc_top/user_clk]
+	  set_property CONFIG.FREQ_HZ ${cpu_freq_hz} [get_bd_intf_pins u_dnn_acc_top/user_axi]
   }
 
   # Create instance: custom cpu mem I/F arbitration 
@@ -273,6 +281,7 @@ proc create_root_design { parentCell } {
      catch {common::send_msg_id "BD_TCL-106" "ERROR" "Unable to referenced block <$block_name>. Please add the files for ${block_name}'s definition into the project."}
      return 1
    }
+   set_property CONFIG.FREQ_HZ ${cpu_freq_hz} [get_bd_pins u_custom_cpu/clk]
 
    if {${::icache} == "1"} {
 	   set block_name icache_wrapper
@@ -284,6 +293,9 @@ proc create_root_design { parentCell } {
 		   catch {common::send_msg_id "BD_TCL-106" "ERROR" "Unable to referenced block <$block_name>. Please add the files for ${block_name}'s definition into the project."}
 		   return 1
 	   }
+	   set_property CONFIG.FREQ_HZ ${cpu_freq_hz} [get_bd_pins u_icache_wrapper/cpu_clk]
+	   set_property CONFIG.FREQ_HZ ${cpu_freq_hz} [get_bd_intf_pins u_icache_wrapper/cpu_inst]
+
    } else {
 	   set block_name inst_if_wrapper
 	   set block_cell_name u_inst_if_wrapper
@@ -294,6 +306,9 @@ proc create_root_design { parentCell } {
 		   catch {common::send_msg_id "BD_TCL-106" "ERROR" "Unable to referenced block <$block_name>. Please add the files for ${block_name}'s definition into the project."}
 		   return 1
 	   }
+
+	   set_property CONFIG.FREQ_HZ ${cpu_freq_hz} [get_bd_pins u_inst_if_wrapper/cpu_clk]
+	   set_property CONFIG.FREQ_HZ ${cpu_freq_hz} [get_bd_intf_pins u_inst_if_wrapper/cpu_inst]
    }
 
    if {${::dcache} == "1"} {
@@ -306,6 +321,10 @@ proc create_root_design { parentCell } {
 		   catch {common::send_msg_id "BD_TCL-106" "ERROR" "Unable to referenced block <$block_name>. Please add the files for ${block_name}'s definition into the project."}
 		   return 1
 	   }
+	   
+	   set_property CONFIG.FREQ_HZ ${cpu_freq_hz} [get_bd_pins u_dcache_wrapper/cpu_clk]
+	   set_property CONFIG.FREQ_HZ ${cpu_freq_hz} [get_bd_intf_pins u_dcache_wrapper/cpu_mem]
+
    } else {
 	   set block_name mem_if_wrapper
 	   set block_cell_name u_mem_if_wrapper
@@ -316,6 +335,8 @@ proc create_root_design { parentCell } {
 		   catch {common::send_msg_id "BD_TCL-106" "ERROR" "Unable to referenced block <$block_name>. Please add the files for ${block_name}'s definition into the project."}
 		   return 1
 	   }
+	   set_property CONFIG.FREQ_HZ ${cpu_freq_hz} [get_bd_pins u_mem_if_wrapper/cpu_clk]
+	   set_property CONFIG.FREQ_HZ ${cpu_freq_hz} [get_bd_intf_pins u_mem_if_wrapper/cpu_mem]
    }
 
 
