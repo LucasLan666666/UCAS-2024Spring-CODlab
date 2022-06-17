@@ -203,6 +203,14 @@ proc create_root_design { parentCell } {
 
   # Create instance: Reset infrastructure for custom CPU sub systems
   set cpu_clk_reset_gen [ create_bd_cell -type ip -vlnv xilinx.com:ip:proc_sys_reset:5.0 cpu_clk_reset_gen ]
+
+  # Create instance: Reset infrastructure for custom CPU memory interface
+  set mem_clk_reset_gen [ create_bd_cell -type ip -vlnv xilinx.com:ip:proc_sys_reset:5.0 mem_clk_reset_gen ]
+
+  # Create instance: VCC
+  set const_vcc [ create_bd_cell -type ip -vlnv xilinx.com:ip:xlconstant:1.1 const_vcc ]
+  set_property -dict [list CONFIG.CONST_WIDTH {1} \
+      CONFIG.CONST_VAL {0x1} ] $const_vcc
 	  
   # Create instance: Register to control reset signal to custom CPU
   set cpu_reset_io [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_gpio:2.0 cpu_reset_io ]
@@ -400,6 +408,7 @@ proc create_root_design { parentCell } {
   connect_bd_net [get_bd_ports role_to_mem_clk] \
                  [get_bd_pins custom_cpu_mem_ic/ACLK] \
                  [get_bd_pins custom_cpu_mem_ic/M00_ACLK] \
+		 [get_bd_pins mem_clk_reset_gen/slowest_sync_clk] \
 		 [get_bd_pins cpu_ddr_upsizer/s_axi_aclk]
 
   # CPU CLK
@@ -423,6 +432,9 @@ proc create_root_design { parentCell } {
   connect_bd_net [get_bd_pins cpu_clk_gen/locked] \
           [get_bd_pins cpu_clk_reset_gen/dcm_locked]
 
+  connect_bd_net [get_bd_pins const_vcc/dout] \
+      [get_bd_pins mem_clk_reset_gen/dcm_locked]
+
   if {${::dnn_acc} != "0"} {
 	  connect_bd_net -net cpu_clk \
 		 [get_bd_pins u_dnn_acc_top/user_clk] \
@@ -443,6 +455,7 @@ proc create_root_design { parentCell } {
   connect_bd_net [get_bd_ports role_resetn] \
       [get_bd_pins cpu_clk_gen/resetn] \
       [get_bd_pins cpu_clk_reset_gen/ext_reset_in] \
+      [get_bd_pins mem_clk_reset_gen/ext_reset_in] \
       [get_bd_pins cpu_reset_io_ic/ARESETN] \
       [get_bd_pins cpu_reset_io_ic/S00_ARESETN] \
       [get_bd_pins custom_cpu_mmio_ic/M00_ARESETN] \
@@ -450,10 +463,12 @@ proc create_root_design { parentCell } {
       [get_bd_pins wall_clk_counter_wrapper/s_axi_aresetn] \
       [get_bd_pins u_wall_clk_counter/resetn]
 
-  connect_bd_net [get_bd_ports role_to_mem_resetn] \
-                 [get_bd_pins custom_cpu_mem_ic/ARESETN] \
+  connect_bd_net [get_bd_pins mem_clk_reset_gen/peripheral_aresetn] \
                  [get_bd_pins custom_cpu_mem_ic/M00_ARESETN] \
 		 [get_bd_pins cpu_ddr_upsizer/s_axi_aresetn]
+
+  connect_bd_net [get_bd_pins mem_clk_reset_gen/interconnect_aresetn] \
+                 [get_bd_pins custom_cpu_mem_ic/ARESETN]
 
   # CPU CLK
   connect_bd_net -net cpu_resetn [get_bd_pins cpu_clk_reset_gen/peripheral_aresetn] \
