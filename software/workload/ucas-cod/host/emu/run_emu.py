@@ -71,15 +71,20 @@ async def emu_main():
     parser.add_argument('--turbo', action='store_true', help='enable turbo trace comparison')
     args = parser.parse_args()
 
-    cfg = EmulatorConfig(args.config)
-    ckptmgr = CheckpointManager(args.checkpoint)
-    emu = Emulator(cfg, ckptmgr)
+    def setup_emu():
+        cfg = EmulatorConfig(args.config)
+        ckptmgr = CheckpointManager(args.checkpoint)
+        emu = Emulator(cfg, ckptmgr)
 
-    for initmem in args.initmem:
-        emu.init_mem_add(initmem[0], initmem[1])
+        for initmem in args.initmem:
+            emu.init_mem_add(initmem[0], initmem[1])
 
-    emu.init_event_add(ResetEvent(0, 1))
-    emu.init_event_add(ResetEvent(10, 0))
+        emu.init_event_add(ResetEvent(0, 1))
+        emu.init_event_add(ResetEvent(10, 0))
+
+        return emu
+
+    emu = setup_emu()
 
     if args.to != None:
         emu.disable_user_trig()
@@ -114,19 +119,18 @@ async def emu_main():
             print(f'*** Timeout: Benchmark execution does not finish after {timeout} seconds', file=sys.stderr)
 
         tasks: list[asyncio.Task] = []
-        run_task = asyncio.create_task(emu_run_task())
-        tasks.append(run_task)
+        tasks.append(asyncio.create_task(emu_run_task()))
         tasks.append(asyncio.create_task(turbo_check_task()))
         tasks.append(asyncio.create_task(timeout_task()))
         await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
-        emu.stop()
-        await run_task
         for t in tasks:
             t.cancel()
         await asyncio.sleep(0)
 
         turbo.enable = False
         print(f'Stopped at cycle {emu.cycle}', file=sys.stderr)
+
+        emu = setup_emu()
 
     if args.rewind != None:
         cycle = emu.cycle - args.rewind
