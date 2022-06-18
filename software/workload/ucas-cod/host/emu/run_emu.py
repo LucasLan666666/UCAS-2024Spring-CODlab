@@ -71,9 +71,10 @@ async def emu_main():
     parser.add_argument('--turbo', action='store_true', help='enable turbo trace comparison')
     args = parser.parse_args()
 
+    cfg = EmulatorConfig(args.config)
+    ckptmgr = CheckpointManager(args.checkpoint)
+
     def setup_emu():
-        cfg = EmulatorConfig(args.config)
-        ckptmgr = CheckpointManager(args.checkpoint)
         emu = Emulator(cfg, ckptmgr)
 
         for initmem in args.initmem:
@@ -128,12 +129,20 @@ async def emu_main():
         await asyncio.sleep(0)
 
         turbo.enable = False
-        print(f'Stopped at cycle {emu.cycle}', file=sys.stderr)
+        cycle = emu.cycle
+        print(f'Stopped at cycle {cycle}', file=sys.stderr)
+
+        # workaround: check if any checkpoint is saved to judge if the fpga board is faulty
+        try:
+            ckptmgr.recent_saved_cycle(0)
+        except ValueError:
+            print('ERROR: no checkpoint is sucessfully saved which is possibly a platform fault. Please contact the administrator.', file=sys.stderr)
+            exit(1)
 
         emu = setup_emu()
 
     if args.rewind != None:
-        cycle = emu.cycle - args.rewind
+        cycle = cycle - args.rewind
         if cycle < 0:
             cycle = 0
         await emu.rewind(cycle)
