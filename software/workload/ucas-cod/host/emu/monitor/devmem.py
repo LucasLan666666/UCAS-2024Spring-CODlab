@@ -19,6 +19,8 @@ class DevMem:
         self.__u32  = np.frombuffer(self.__mmap, np.uint32, size >> 2)
 
     def __del__(self):
+        self.__u8 = None
+        self.__u32 = None
         self.__mmap.close()
         os.close(self.__file)
 

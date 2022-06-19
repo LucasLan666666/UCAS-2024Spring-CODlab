@@ -73,13 +73,19 @@ async def emu_main():
 
     cfg = EmulatorConfig(args.config)
     ckptmgr = CheckpointManager(args.checkpoint)
-    emu = Emulator(cfg, ckptmgr)
 
-    for initmem in args.initmem:
-        emu.init_mem_add(initmem[0], initmem[1])
+    def setup_emu():
+        emu = Emulator(cfg, ckptmgr)
 
-    emu.init_event_add(ResetEvent(0, 1))
-    emu.init_event_add(ResetEvent(10, 0))
+        for initmem in args.initmem:
+            emu.init_mem_add(initmem[0], initmem[1])
+
+        emu.init_event_add(ResetEvent(0, 1))
+        emu.init_event_add(ResetEvent(10, 0))
+
+        return emu
+
+    emu = setup_emu()
 
     if args.to != None:
         emu.disable_user_trig()
@@ -114,22 +120,29 @@ async def emu_main():
             print(f'*** Timeout: Benchmark execution does not finish after {timeout} seconds', file=sys.stderr)
 
         tasks: list[asyncio.Task] = []
-        run_task = asyncio.create_task(emu_run_task())
-        tasks.append(run_task)
+        tasks.append(asyncio.create_task(emu_run_task()))
         tasks.append(asyncio.create_task(turbo_check_task()))
         tasks.append(asyncio.create_task(timeout_task()))
         await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
-        emu.stop()
-        await run_task
         for t in tasks:
             t.cancel()
         await asyncio.sleep(0)
 
         turbo.enable = False
-        print(f'Stopped at cycle {emu.cycle}', file=sys.stderr)
+        cycle = emu.cycle
+        print(f'Stopped at cycle {cycle}', file=sys.stderr)
+
+        # workaround: check if any checkpoint is saved to judge if the fpga board is faulty
+        try:
+            ckptmgr.recent_saved_cycle(0)
+        except ValueError:
+            print('ERROR: no checkpoint is sucessfully saved which is possibly a platform fault. Please contact the administrator.', file=sys.stderr)
+            exit(1)
+
+        emu = setup_emu()
 
     if args.rewind != None:
-        cycle = emu.cycle - args.rewind
+        cycle = cycle - args.rewind
         if cycle < 0:
             cycle = 0
         await emu.rewind(cycle)
