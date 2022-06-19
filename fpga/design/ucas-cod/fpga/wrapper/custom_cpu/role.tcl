@@ -356,7 +356,7 @@ proc create_root_design { parentCell } {
   set_property CONFIG.FREQ_HZ 100000000 [get_bd_ports role_clk]
 
   create_bd_port -dir I -type clk role_to_mem_clk
-  set_property CONFIG.FREQ_HZ 200000000 [get_bd_ports role_to_mem_clk]
+  set_property CONFIG.FREQ_HZ 100000000 [get_bd_ports role_to_mem_clk]
 
 #=============================================
 # Reset ports
