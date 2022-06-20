@@ -87,59 +87,59 @@ async def emu_main():
 
     emu = setup_emu()
 
-    if args.to != None:
-        emu.disable_user_trig()
-        await emu.run(args.period, args.to)
+    # workaround: the configuration file does not store memory base so the base of emu_top.u_rammodel.host_axi is used
+    turbo = TurboTraceCmpCtrl(cfg.memory['emu_top.u_rammodel.host_axi'].base, cfg.ctrl.base)
+    if args.turbo:
+        for initmem in args.initmem:
+            if initmem[0] == 'emu_top.u_rammodel.host_axi':
+                turbo.load_mem(initmem[1])
+        turbo.enable = True
     else:
-        # workaround: the configuration file does not store memory base so the base of emu_top.u_rammodel.host_axi is used
-        turbo = TurboTraceCmpCtrl(cfg.memory['emu_top.u_rammodel.host_axi'].base, cfg.ctrl.base)
-        if args.turbo:
-            for initmem in args.initmem:
-                if initmem[0] == 'emu_top.u_rammodel.host_axi':
-                    turbo.load_mem(initmem[1])
-            turbo.enable = True
-        else:
-            turbo.enable = False
+        turbo.enable = False
 
-        async def emu_run_task():
+    async def emu_run_task():
+        if args.to != None:
+            emu.disable_user_trig()
+            await emu.run(args.period, args.to)
+        else:
             emu.enable_user_trig()
             await emu.run(args.period, args.timeout)
 
-        async def turbo_check_task():
-            print(f'[TURBO] Trace comparison enabled', file=sys.stderr)
-            while not turbo.trace_mismatch:
-                await asyncio.sleep(0.1)
-            print('******************** Turbo CPU Commit Trace Mismatch ********************', file=sys.stderr)
-            print('Yours:      PC = 0x%08x, RF_waddr = 0x%02x, RF_wdata = 0x%08x' % (turbo.dut_pc, turbo.dut_waddr, turbo.dut_wdata), file=sys.stderr)
-            print('Reference:  PC = 0x%08x, RF_waddr = 0x%02x, RF_wdata = 0x%08x' % (turbo.ref_pc, turbo.ref_waddr, turbo.ref_wdata), file=sys.stderr)
-            print('*************************************************************************', file=sys.stderr)
+    async def turbo_check_task():
+        print(f'[TURBO] Trace comparison enabled', file=sys.stderr)
+        while not turbo.trace_mismatch:
+            await asyncio.sleep(0.1)
+        print('******************** Turbo CPU Commit Trace Mismatch ********************', file=sys.stderr)
+        print('Yours:      PC = 0x%08x, RF_waddr = 0x%02x, RF_wdata = 0x%08x' % (turbo.dut_pc, turbo.dut_waddr, turbo.dut_wdata), file=sys.stderr)
+        print('Reference:  PC = 0x%08x, RF_waddr = 0x%02x, RF_wdata = 0x%08x' % (turbo.ref_pc, turbo.ref_waddr, turbo.ref_wdata), file=sys.stderr)
+        print('*************************************************************************', file=sys.stderr)
 
-        async def timeout_task(timeout=300):
-            print(f'[TURBO] Timeout is set to {timeout} seconds', file=sys.stderr)
-            await asyncio.sleep(timeout)
-            print(f'*** Timeout: Benchmark execution does not finish after {timeout} seconds', file=sys.stderr)
+    async def timeout_task(timeout=300):
+        print(f'[TURBO] Timeout is set to {timeout} seconds', file=sys.stderr)
+        await asyncio.sleep(timeout)
+        print(f'*** Timeout: Benchmark execution does not finish after {timeout} seconds', file=sys.stderr)
 
-        tasks: list[asyncio.Task] = []
-        tasks.append(asyncio.create_task(emu_run_task()))
-        tasks.append(asyncio.create_task(turbo_check_task()))
-        tasks.append(asyncio.create_task(timeout_task()))
-        await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
-        for t in tasks:
-            t.cancel()
-        await asyncio.sleep(0)
+    tasks: list[asyncio.Task] = []
+    tasks.append(asyncio.create_task(emu_run_task()))
+    tasks.append(asyncio.create_task(turbo_check_task()))
+    tasks.append(asyncio.create_task(timeout_task()))
+    await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
+    for t in tasks:
+        t.cancel()
+    await asyncio.sleep(0)
 
-        turbo.enable = False
-        cycle = emu.cycle
-        print(f'Stopped at cycle {cycle}', file=sys.stderr)
+    turbo.enable = False
+    cycle = emu.cycle
+    print(f'Stopped at cycle {cycle}', file=sys.stderr)
 
-        # workaround: check if any checkpoint is saved to judge if the fpga board is faulty
-        try:
-            ckptmgr.recent_saved_cycle(0)
-        except ValueError:
-            print('ERROR: no checkpoint is sucessfully saved which is possibly a platform fault. Please contact the administrator.', file=sys.stderr)
-            exit(1)
+    # workaround: check if any checkpoint is saved to judge if the fpga board is faulty
+    try:
+        ckptmgr.recent_saved_cycle(0)
+    except ValueError:
+        print('ERROR: no checkpoint is sucessfully saved which is possibly a platform fault. Please contact the administrator.', file=sys.stderr)
+        exit(1)
 
-        emu = setup_emu()
+    emu = setup_emu()
 
     if args.rewind != None:
         cycle = cycle - args.rewind
