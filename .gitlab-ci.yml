@@ -293,7 +293,7 @@ reuse_sw:
     name: "$CI_JOB_STAGE-$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
     paths:
       - sw_version
-      - software/workload/ucas-cod/benchmark/simple_test/
+      - software/workload/ucas-cod/benchmark/
   dependencies:
     - software
 

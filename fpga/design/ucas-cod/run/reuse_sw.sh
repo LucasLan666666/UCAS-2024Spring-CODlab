@@ -25,7 +25,7 @@ SW_VERSION=`cat sw_version`
 echo Reused software version: $SW_VERSION
 
 git fetch origin $SW_VERSION
-if ! git diff --exit-code $SW_VERSION software/workload/ucas-cod/benchmark/simple_test lab_env.yml ; then
+if ! git diff --exit-code $SW_VERSION software/workload/ucas-cod/benchmark lab_env.yml ; then
 	echo Software build dependencies changed. Please update software source code to rerun compilation.
 	exit 1
 fi
