@@ -66,7 +66,7 @@ module custom_cpu_test
             if ($feof(trace_file))
                 trace_end <= 1'b1;
             #1;
-            if (rf_en_rt !== 1'b1 & has_compared) begin
+            if (has_compared) begin
             	if ($feof(trace_file))
                 	trace_end <= 1'b1;
 
