@@ -6,7 +6,6 @@ module adder (
 	output [7:0] result
 );
 
-	/*TODO: Please add your logic design here*/
 	assign result = operand0 + operand1;
 
 endmodule
