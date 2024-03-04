@@ -22,7 +22,7 @@ module alu (
     wire                        cout;
     wire   [`DATA_WIDTH - 1:0]  sum;
 
-    adder alu_adder (
+    adder_32 alu_adder (
         .A(         A2),
         .B(         B2),
         .cin(        0),
@@ -46,11 +46,11 @@ module alu (
     assign   Result = (ALUop == `AND) ? A & B
                     : (ALUop == `OR ) ? A | B
                     : (ALUop == `ADD || ALUop == `SUB) ? sum
-                    : (ALUop == `SLT) ? sum[`DATA_WIDTH - 1] ^^ Overflow
+                    : (ALUop == `SLT) ? sum[`DATA_WIDTH - 1] ^ Overflow
                     : `DATA_WIDTH'bz;
 endmodule
 
-module adder (
+module adder_32 (
     input  [`DATA_WIDTH - 1:0]  A,
     input  [`DATA_WIDTH - 1:0]  B,
     input                       cin,
