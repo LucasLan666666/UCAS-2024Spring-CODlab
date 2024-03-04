@@ -39,8 +39,8 @@ module alu (
 
     assign Overflow = (ALUop == ADD) ? ( A[`DATA_WIDTH - 1] &&  B[`DATA_WIDTH - 1] && ~sum[`DATA_WIDTH - 1])
                                     || (~A[`DATA_WIDTH - 1] && ~B[`DATA_WIDTH - 1] &&  sum[`DATA_WIDTH - 1])
-                    : (ALUop == SUB) ? (~A[`DATA_WIDTH - 1] &&  B[`DATA_WIDTH - 1] &&  sum[`DATA_WIDTH - 1])
-                                    || ( A[`DATA_WIDTH - 1] && ~B[`DATA_WIDTH - 1] && ~sum[`DATA_WIDTH - 1])
+                    : (ALUop == SUB || ALUop == SLT) ? (~A[`DATA_WIDTH - 1] &&  B[`DATA_WIDTH - 1] &&  sum[`DATA_WIDTH - 1])
+                                                    || ( A[`DATA_WIDTH - 1] && ~B[`DATA_WIDTH - 1] && ~sum[`DATA_WIDTH - 1])
                     : `DATA_WIDTH'bx;
 
     assign CarryOut = (ALUop == ADD) ? cout
