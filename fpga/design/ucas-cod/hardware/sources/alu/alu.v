@@ -32,7 +32,7 @@ module alu (
 
     assign b_invert = (ALUop == SUB || ALUop == SLT) ?  1 : 0;
     // B 是否为补码最小数
-    assign   B_Tmin = (A[`DATA_WIDTH - 1] ^ sum[`DATA_WIDTH - 1]) && (A[`DATA_WIDTH - 2:0] ^ sum[`DATA_WIDTH - 2:0] == 0);
+    assign  B_Tmin = (B == 1'b1 << (`DATA_WIDTH - 1));
 
     assign CarryOut = (ALUop == ADD) ? cout
                     : (ALUop == SUB) ? (~A[`DATA_WIDTH - 1] &&  B[`DATA_WIDTH - 1])
