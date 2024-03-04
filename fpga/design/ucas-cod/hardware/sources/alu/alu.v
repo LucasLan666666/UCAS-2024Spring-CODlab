@@ -56,7 +56,7 @@ module adder_32 (
     input  [`DATA_WIDTH - 1:0]  B,
     input                       cin,
     output                      cout,
-    output                      sum
+    output [`DATA_WIDTH - 1:0]  sum
 );
     assign {cout, sum} = A + B + cin;
 endmodule
