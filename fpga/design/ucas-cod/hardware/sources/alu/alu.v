@@ -26,14 +26,15 @@ module alu (
     adder_32 alu_adder (
         .A(         A2),
         .B(         B2),
-        .cin(        0),
+        .cin( b_invert),
         .cout(    cout),
         .sum(      sum)
     );
 
     // 一个加法器实现 ADD，SUB，SLT
     assign       A2 = A;
-    assign       B2 = (ALUop == SUB || ALUop == SLT) ? ~B + 1: B;
+    assign       B2 = (ALUop == SUB || ALUop == SLT) ? ~B : B;
+    assign b_invert = (ALUop == SUB || ALUop == SLT) ? 1 : 0;
 
     assign CarryOut = (ALUop == ADD) ? cout
                     : (ALUop == SUB) ? (~A[`DATA_WIDTH - 1] && B[`DATA_WIDTH - 1]) || (~A[`DATA_WIDTH - 1] && ~B[`DATA_WIDTH - 1] && sum[`DATA_WIDTH - 1]) || (A[`DATA_WIDTH - 1] && B[`DATA_WIDTH - 1] && ~sum[`DATA_WIDTH - 1])
