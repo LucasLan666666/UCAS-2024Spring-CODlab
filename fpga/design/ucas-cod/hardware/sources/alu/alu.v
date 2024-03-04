@@ -21,7 +21,6 @@ module alu (
     wire   [`DATA_WIDTH - 1:0]  B2;
     wire                        cout;
     wire   [`DATA_WIDTH - 1:0]  sum;
-    wire                        B_Tmin;
 
     adder_32 alu_adder (
         .A(          A),
@@ -33,20 +32,15 @@ module alu (
 
     // for subtraction
     assign       B2 = (ALUop == SUB || ALUop == SLT) ? ~B : B;
-    assign b_invert = (ALUop == SUB || ALUop == SLT) ?  1 : 0;
-    // whether B is the maximum, two's complement number
-    assign   B_Tmin = (B == (`DATA_WIDTH'b1 << (`DATA_WIDTH - 1)));
+    assign b_invert = (ALUop == SUB || ALUop == SLT) ? 1'b1 : 1'b0;
 
-    assign Overflow = (ALUop == ADD) ? ( A[`DATA_WIDTH - 1] &&  B[`DATA_WIDTH - 1] && ~sum[`DATA_WIDTH - 1])
-                                    || (~A[`DATA_WIDTH - 1] && ~B[`DATA_WIDTH - 1] &&  sum[`DATA_WIDTH - 1])
-                    : (ALUop == SUB || ALUop == SLT) ? (~A[`DATA_WIDTH - 1] &&  B[`DATA_WIDTH - 1] &&  sum[`DATA_WIDTH - 1])
-                                                    || ( A[`DATA_WIDTH - 1] && ~B[`DATA_WIDTH - 1] && ~sum[`DATA_WIDTH - 1])
+    assign Overflow = (ALUop == ADD) ? ((A[`DATA_WIDTH - 1] == B[`DATA_WIDTH - 1]) && (A[`DATA_WIDTH - 1] ^ sum[`DATA_WIDTH - 1]))
+                    : (ALUop == SUB || ALUop == SLT) ? ((A[`DATA_WIDTH - 1] ^ B[`DATA_WIDTH - 1]) && (A[`DATA_WIDTH - 1] ^ sum[`DATA_WIDTH - 1]))
                     : `DATA_WIDTH'bx;
 
     assign CarryOut = (ALUop == ADD) ? cout
-                    : (ALUop == SUB) ? (~A[`DATA_WIDTH - 1] &&  B[`DATA_WIDTH - 1])
-                                    || (~A[`DATA_WIDTH - 1] && ~B[`DATA_WIDTH - 1] &&  sum[`DATA_WIDTH - 1])
-                                    || ( A[`DATA_WIDTH - 1] &&  B[`DATA_WIDTH - 1] &&  sum[`DATA_WIDTH - 1])
+                    : (ALUop == SUB) ? (~A[`DATA_WIDTH - 1] && B[`DATA_WIDTH - 1])
+                                    || ((A[`DATA_WIDTH - 1] == B[`DATA_WIDTH - 1]) && sum[`DATA_WIDTH - 1])
                     : `DATA_WIDTH'bx;
 
     assign     Zero = (Result == `DATA_WIDTH'b0);
