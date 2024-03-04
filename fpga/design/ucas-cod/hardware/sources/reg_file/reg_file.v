@@ -21,11 +21,11 @@ module reg_file (
     always @(posedge clk) begin
         // 根据 wen 判断是否接受输入
         if (wen == 1 && waddr != `ADDR_WIDTH'b0) begin
-            my_reg_file [waddr][`DATA_WIDTH] <= wdata;
+            my_reg_file[waddr] <= wdata;
         end
     end
     // 读出指定地址数据
-    assign rdata1 = (raddr1 == 0) ? `DATA_WIDTH'b0 : my_reg_file [raddr1];
-    assign rdata2 = (raddr2 == 0) ? `DATA_WIDTH'b0 : my_reg_file [raddr2];
+    assign rdata1 = (raddr1 == 0) ? `DATA_WIDTH'b0 : my_reg_file[raddr1];
+    assign rdata2 = (raddr2 == 0) ? `DATA_WIDTH'b0 : my_reg_file[raddr2];
 
 endmodule
