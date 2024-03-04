@@ -46,7 +46,7 @@ module alu (
     assign CarryOut = (ALUop == ADD) ? cout
                     : (ALUop == SUB) ? (~A[`DATA_WIDTH - 1] &&  B[`DATA_WIDTH - 1])
                                     || (~A[`DATA_WIDTH - 1] && ~B[`DATA_WIDTH - 1] &&  sum[`DATA_WIDTH - 1])
-                                    || ( A[`DATA_WIDTH - 1] &&  B[`DATA_WIDTH - 1] && ~sum[`DATA_WIDTH - 1] && B_Tmin)
+                                    || ( A[`DATA_WIDTH - 1] &&  B[`DATA_WIDTH - 1] &&  sum[`DATA_WIDTH - 1])
                     : `DATA_WIDTH'bx;
 
     assign     Zero = (Result == `DATA_WIDTH'b0);
