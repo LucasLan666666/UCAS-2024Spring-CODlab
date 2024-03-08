@@ -34,12 +34,12 @@ module alu (
     );
 
     // for subtraction
-    assign  B_trans = (ALUop == SUB) || (ALUop == SLT) ? ~B : B;
-    assign b_invert = (ALUop == SUB) || (ALUop == SLT);
+    assign   B_trans = (ALUop == SUB) || (ALUop == SLT) ? ~B : B;
+    assign  b_invert = (ALUop == SUB) || (ALUop == SLT);
     // for Status Flags
-    assign   sign_A = A[`DATA_WIDTH - 1];
-    assign   sign_B = B[`DATA_WIDTH - 1];
-    assign   sign_S = S[`DATA_WIDTH - 1];
+    assign    sign_A = A[`DATA_WIDTH - 1];
+    assign    sign_B = B[`DATA_WIDTH - 1];
+    assign    sign_S = S[`DATA_WIDTH - 1];
 
     assign  Overflow = (ALUop == ADD) && (sign_A == sign_B) && (sign_A ^ sign_S)
                     || (ALUop == SUB || ALUop == SLT) && (sign_A ^ sign_B) && (sign_A ^ sign_S);
@@ -47,13 +47,12 @@ module alu (
     assign  CarryOut = (ALUop == ADD) && cout
                     || (ALUop == SUB) && ((~sign_A && sign_B) || (sign_A == sign_B) && sign_S);
 
-    assign     Zero = !Result;
+    assign      Zero = !Result;
 
-    assign   Result = (ALUop == AND) ? A & B
-                    : (ALUop == OR ) ? A | B
-                    : (ALUop == ADD || ALUop == SUB) ? S
-                    : (ALUop == SLT) ? sign_S ^ Overflow
-                    : `DATA_WIDTH'b0;
+    assign    Result = {32{ALUop == AND}} & (A & B)
+                    |  {32{ALUop == OR }} & (A | B)
+                    |  {32{ALUop == ADD || ALUop == SUB}} & S
+                    |  {32{ALUop == SLT}} & (sign_S ^ Overflow);
 endmodule
 
 module adder_for_ALU (

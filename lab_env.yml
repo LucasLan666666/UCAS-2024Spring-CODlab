@@ -1,6 +1,6 @@
 variables:
   # TARGET_DESIGN can be "example", "alu", "reg_file", "simple_cpu", "custom_cpu"...
-  TARGET_DESIGN: "example"
+  TARGET_DESIGN: "alu"
 
   # CPU_ISA must be either "mips" or "riscv32"
   CPU_ISA: "mips"
