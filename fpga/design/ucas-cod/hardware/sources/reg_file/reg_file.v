@@ -20,12 +20,11 @@ module reg_file (
 
     always @(posedge clk) begin
         // when to accept input
-        if (wen == 1 && waddr != `ADDR_WIDTH'b0) begin
+        if (wen && (waddr ^ `ADDR_WIDTH'b0)) begin
             my_reg_file[waddr] <= wdata;
         end
     end
     // read data from specific address
-    assign rdata1 = (raddr1 == 0) ? `DATA_WIDTH'b0 : my_reg_file[raddr1];
-    assign rdata2 = (raddr2 == 0) ? `DATA_WIDTH'b0 : my_reg_file[raddr2];
-
+    assign rdata1 = {`DATA_WIDTH{raddr1 != `ADDR_NUM'b0}} & my_reg_file[raddr1];
+    assign rdata2 = {`DATA_WIDTH{raddr2 != `ADDR_NUM'b0}} & my_reg_file[raddr2];
 endmodule
