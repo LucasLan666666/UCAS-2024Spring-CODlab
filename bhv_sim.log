@@ -1,4 +1,4 @@
-VCD info: dumpfile fpga/sim_out/alu/dump.vcd opened for output.
+VCD info: dumpfile fpga/sim_out/reg_file/dump.vcd opened for output.
 =================================================
-Success: finished alu testbench.
+Success: finished reg_file testbench.
 =================================================
