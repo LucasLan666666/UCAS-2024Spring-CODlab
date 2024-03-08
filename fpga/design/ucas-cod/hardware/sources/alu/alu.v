@@ -12,6 +12,7 @@ module alu (
     output [`DATA_WIDTH - 1:0]  Result
 );
 
+    // Status Flags
     localparam AND = 3'b000;
     localparam  OR = 3'b001;
     localparam ADD = 3'b010;
@@ -21,11 +22,10 @@ module alu (
     wire   [`DATA_WIDTH - 1:0]  B_trans;
     wire                        cout;
     wire   [`DATA_WIDTH - 1:0]  S;
-    wire                        sign_A;
-    wire                        sign_B;
-    wire                        sign_;
+    wire                        sign_A, sign_B, sign_S;
 
-    adder_32 alu_adder (
+    // the only adder, for ADD, SUB, SLT
+    adder_for_ALU alu_adder (
         .A(          A),
         .B(    B_trans),
         .cin( b_invert),
@@ -34,29 +34,29 @@ module alu (
     );
 
     // for subtraction
-    assign  B_trans =  (ALUop == SUB) || (ALUop == SLT) ? ~B : B;
-    assign b_invert =  (ALUop == SUB) || (ALUop == SLT);
+    assign  B_trans = (ALUop == SUB) || (ALUop == SLT) ? ~B : B;
+    assign b_invert = (ALUop == SUB) || (ALUop == SLT);
     // for Status Flags
-    assign   sign_A =  A[`DATA_WIDTH - 1];
-    assign   sign_B =  B[`DATA_WIDTH - 1];
-    assign   sign_S =  S[`DATA_WIDTH - 1];
+    assign   sign_A = A[`DATA_WIDTH - 1];
+    assign   sign_B = B[`DATA_WIDTH - 1];
+    assign   sign_S = S[`DATA_WIDTH - 1];
 
-    assign Overflow =  (ALUop == ADD) && (sign_A == sign_B) && (sign_A ^ sign_S)
+    assign  Overflow = (ALUop == ADD) && (sign_A == sign_B) && (sign_A ^ sign_S)
                     || (ALUop == SUB || ALUop == SLT) && (sign_A ^ sign_B) && (sign_A ^ sign_S);
 
-    assign CarryOut =  (ALUop == ADD) && cout
+    assign  CarryOut = (ALUop == ADD) && cout
                     || (ALUop == SUB) && ((~sign_A && sign_B) || (sign_A == sign_B) && sign_S);
 
-    assign     Zero =  (Result == `DATA_WIDTH'b0);
+    assign     Zero = !Result;
 
-    assign   Result =  (ALUop == AND) ? A & B
-                    :  (ALUop == OR ) ? A | B
-                    :  (ALUop == ADD || ALUop == SUB) ? S
-                    :  (ALUop == SLT) ? sign_S ^ Overflow
-                    :  `DATA_WIDTH'b0;
+    assign   Result = (ALUop == AND) ? A & B
+                    : (ALUop == OR ) ? A | B
+                    : (ALUop == ADD || ALUop == SUB) ? S
+                    : (ALUop == SLT) ? sign_S ^ Overflow
+                    : `DATA_WIDTH'b0;
 endmodule
 
-module adder_32 (
+module adder_for_ALU (
     input  [`DATA_WIDTH - 1:0]  A,
     input  [`DATA_WIDTH - 1:0]  B,
     input                       cin,
