@@ -1,4 +1,4 @@
-VCD info: dumpfile fpga/sim_out/reg_file/dump.vcd opened for output.
-=================================================
-Success: finished reg_file testbench.
-=================================================
+============== Testbench Log Start ==============
+VCD info: dumpfile fpga/sim_out/example/dump.vcd opened for output.
+Testbench Succeeded!
+============== Testbench Log Ended ==============
