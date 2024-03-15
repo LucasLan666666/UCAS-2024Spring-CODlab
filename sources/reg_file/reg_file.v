@@ -1,3 +1,4 @@
+`default_nettype none
 `timescale 10 ns / 1 ns
 
 `define DATA_WIDTH 32

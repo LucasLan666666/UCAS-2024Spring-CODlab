@@ -1,5 +1,5 @@
+`default_nettype none
 `timescale 10 ns / 1 ns
-
 `define DATA_WIDTH 32
 
 module alu (
@@ -20,47 +20,37 @@ module alu (
     localparam SLT = 3'b111;
 
     wire   [`DATA_WIDTH - 1:0]  B_trans;
+    wire                        b_invert;
     wire                        cout;
     wire   [`DATA_WIDTH - 1:0]  S;
     wire                        sign_A, sign_B, sign_S;
+    wire                        op_and, op_or, op_add, op_sub, op_slt;
 
-    // the only adder, for ADD, SUB, SLT
-    adder_for_ALU alu_adder (
-        .A(          A),
-        .B(    B_trans),
-        .cin( b_invert),
-        .cout(    cout),
-        .sum(        S)
-    );
+    // different ops
+    assign op_and = (ALUop == AND);
+    assign  op_or = (ALUop ==  OR);
+    assign op_add = (ALUop == ADD);
+    assign op_sub = (ALUop == SUB);
+    assign op_slt = (ALUop == SLT);
+
+    // for Status Flags
+    assign sign_A = A[`DATA_WIDTH - 1];
+    assign sign_B = B[`DATA_WIDTH - 1];
+    assign sign_S = S[`DATA_WIDTH - 1];
 
     // for subtraction
     assign  B_trans = {32{b_invert}} ^ B;
-    assign b_invert = ALUop == SUB || ALUop == SLT;
-    // for Status Flags
-    assign   sign_A = A[`DATA_WIDTH - 1];
-    assign   sign_B = B[`DATA_WIDTH - 1];
-    assign   sign_S = S[`DATA_WIDTH - 1];
+    assign b_invert = op_sub || op_slt;
 
-    assign Overflow =  (ALUop == ADD) && !(sign_A != sign_B) && (sign_A != sign_S)
-                    || b_invert && (sign_A != sign_B) && (sign_A != sign_S);
+    // the only adder, for ADD, SUB, SLT
+    assign {cout, S} = A + B_trans + b_invert;
 
-    assign CarryOut =  (ALUop == ADD) && cout
-                    || (ALUop == SUB) && ((!sign_A && sign_B) || !(sign_A != sign_B) && sign_S);
-
+    // Status Flags
+    assign Overflow = (op_add && (sign_A == sign_B) || b_invert && (sign_A != sign_B)) && (sign_A != sign_S);
+    assign CarryOut = op_add && cout || op_sub && !cout;
     assign     Zero = !Result;
-
-    assign   Result = {32{ALUop == AND}} & (A & B)
-                    | {32{ALUop == OR }} & (A | B)
-                    | {32{ALUop == ADD || ALUop == SUB}} & S
-                    | {32{ALUop == SLT}} & (sign_S != Overflow);
-endmodule
-
-module adder_for_ALU (
-    input  [`DATA_WIDTH - 1:0]  A,
-    input  [`DATA_WIDTH - 1:0]  B,
-    input                       cin,
-    output                      cout,
-    output [`DATA_WIDTH - 1:0]  sum
-);
-    assign {cout, sum} = A + B + cin;
+    assign   Result = {32{op_and}} & (A & B)
+                    | {32{op_or}} & (A | B)
+                    | {32{op_add || op_sub}} & S
+                    | {32{op_slt}} & (sign_S != Overflow);
 endmodule
